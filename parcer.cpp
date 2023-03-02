@@ -76,10 +76,15 @@ std::vector<server> getServersInfos(std::string configFilePath) {
 
 	cmd = readFile(configFilePath);
 	for (int i = 0;  i < cmd.size(); i++) {
-		while(cmd[i] == "\n") {
+		error_pages_index = -1;
+		routes_index = -1;
+		while(i < cmd.size() && cmd[i] == "\n") {
 			i++;
 			lines_count++;
 		}
+		if (i >= cmd.size())
+			break;
+		std::cerr << "up is: [" <<cmd[i] << "]\n";
 		if (parce_scoop == OUT_SCOOP) {
 			if (cmd[i] != "server") {
 				throw Exception(configFilePath + ":line " + std::to_string(lines_count) + ": '" +cmd[i] +"' is undefined, Do you mean 'server'\n");
@@ -159,6 +164,7 @@ std::vector<server> getServersInfos(std::string configFilePath) {
 					i++;
 					lines_count++;
 				} else if (cmd[i] == "location") {
+					cgi_pass_index = -1;
 					i++;
 					if (i >= cmd.size() || is_special(cmd[i][0]))
 						throw Exception(configFilePath + ":line " + std::to_string(lines_count) + ": location path is required\n");
@@ -252,7 +258,9 @@ std::vector<server> getServersInfos(std::string configFilePath) {
 							cgi_pass_index++;
 							if (cmd[i] == ";" || cmd[i] == "\n")
 								throw Exception(configFilePath + ":line " + std::to_string(lines_count) + ": "+ cmd[i] +" 'cgi_param' is invalid for the cgi\n");
-							servers[servers_index].routes[routes_index].cgi_pass[cgi_pass_index].cgi_pass = cmd[i++];
+							std::cerr << "cgi_index = [" << cgi_pass_index << "]\n";
+							servers[servers_index].routes[routes_index].cgi_pass[cgi_pass_index].cgi_pass = cmd[i];
+							i++;
 							if (cmd[i] == ";" || cmd[i] == "\n" )
 								throw Exception(configFilePath + ":line " + std::to_string(lines_count) + ": 'cgi_pass' is required\n");
 							servers[servers_index].routes[routes_index].cgi_pass[cgi_pass_index].cgi_param = cmd[i++];
@@ -265,10 +273,17 @@ std::vector<server> getServersInfos(std::string configFilePath) {
 						}
 						if (cmd[i] == "}") {
 							parce_scoop = SERVER_SCOOP;
-							i++;
+							//i++;
 						}
 						i++;
 					}
+				}
+				if (cmd[i] == "}") {
+					parce_scoop = OUT_SCOOP;
+					i++;
+					std::cout << "down is: [" <<cmd[i] <<"]\n";
+					
+					break;
 				}
 				i++;
 			}
