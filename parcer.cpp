@@ -87,9 +87,8 @@ std::vector<server> getServersInfos(std::string configFilePath) {
 	for (int i = 0;  i < cmd.size(); i++) {
 		error_pages_index = -1;
 		routes_index = -1;
-		while(i < cmd.size() && cmd[i] == "\n") {
+		while(i < cmd.size() && cmd[i] == "\n")
 			i++;
-		}
 		if (i >= cmd.size())
 			break;
 		if (parce_scoop == OUT_SCOOP) {
@@ -107,13 +106,9 @@ std::vector<server> getServersInfos(std::string configFilePath) {
 			servers.push_back(server());
 		}
 		else if (parce_scoop == SERVER_SCOOP) {
-			//i++;
 			while (i < cmd.size()) {
-				while(cmd[i] == "\n") {
+				while(cmd[i] == "\n")
 					i++;
-	
-				}
-				//std::cerr << cmd[i];
 				if (cmd[i] == "listen") {
 					i++;
 					if (cmd[i] == ";" || cmd[i] == "\n")
@@ -179,23 +174,17 @@ std::vector<server> getServersInfos(std::string configFilePath) {
 					routes_index++;
 					servers[servers_index].routes[routes_index].route_name = cmd[i];
 					i++;
-					while(cmd[i] == "\n") {
+					while(cmd[i] == "\n")
 						i++;
-		
-					}
 					if (cmd[i] != "{")
 						throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": '" +cmd[i] +"' is undefined, '{' is expected after 'location path' definition\n");
 					i++;
-					while(cmd[i] == "\n") {
+					while(cmd[i] == "\n")
 						i++;
-		
-					}
 					parce_scoop = ROUTE_SCOOP;
 					while (parce_scoop == ROUTE_SCOOP) {
-						while(cmd[i] == "\n") {
+						while(cmd[i] == "\n")
 							i++;
-			
-						}
 						if (cmd[i] == "allow_methods") {
 							i++;
 							if (cmd[i] == ";" || cmd[i] == "\n")
@@ -215,7 +204,6 @@ std::vector<server> getServersInfos(std::string configFilePath) {
 							if (cmd[i] == "\n")
 								throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": ';' is expected\n");
 							i++;
-							
 							}
 						}else if (cmd[i] == "autoindex") {
 							i++;
@@ -228,7 +216,6 @@ std::vector<server> getServersInfos(std::string configFilePath) {
 							if (cmd[i] != ";")
 									throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": too many arguments for 'autoindex'\n");
 						 	i++;
-							
 						}else if (cmd[i] == "root") {
 							i++;
 							if (cmd[i] == ";" || cmd[i] == "\n")
@@ -240,7 +227,6 @@ std::vector<server> getServersInfos(std::string configFilePath) {
 							if (cmd[i] != ";")
 									throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": too many arguments for 'root'\n");
 							i++;
-							
 						}else if (cmd[i] == "upload_pass") {
 							i++;
 							if (cmd[i] == ";" || cmd[i] == "\n")
@@ -252,7 +238,6 @@ std::vector<server> getServersInfos(std::string configFilePath) {
 							if (cmd[i] != ";")
 									throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": too many arguments for 'upload_pass'\n");
 							i++;
-							
 						} else if (cmd[i] == "return") {
 							i++;
 							if (cmd[i] == ";" || cmd[i] == "\n")
@@ -264,7 +249,6 @@ std::vector<server> getServersInfos(std::string configFilePath) {
 							if (cmd[i] != ";")
 									throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": too many arguments for 'return'\n");
 							i++;
-							
 						} else if (cmd[i] == "cgi_pass") {
 							i++;
 							servers[servers_index].routes[routes_index].cgi_pass.push_back(cgi());
@@ -298,7 +282,6 @@ std::vector<server> getServersInfos(std::string configFilePath) {
 			}
 		}
 	}
-	//std::cout << servers_index;
 	return servers;
 }
 
@@ -307,7 +290,7 @@ int main(int arc, char** av) {
 	std::vector<server>	servers;
 	try {
 		servers = getServersInfos(av[1]);
-		std::cout << "Number of servers: " << servers.size() <<"\n";
+		std::cout << "Number of servers: " << servers[4].routes[0]. <<"\n";
 	} catch (std::exception& obj) {
 		std::cout << obj.what();
 	}
