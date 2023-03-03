@@ -15,6 +15,7 @@ class servers
     std::vector<struct pollfd> fd_poll;
     std::vector<int> type;
     std::vector<_socket> sockets;
+    //std::vector<servers> configs;
     public:
         servers(const std::string *host,const std::string *ports,int len);
         int deploy();
