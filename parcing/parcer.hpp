@@ -47,7 +47,7 @@ struct route
 	std::vector<cgi>			cgi_pass;
 };
 
-struct server {
+struct config {
 	std::vector<std::string>	ports;
 	std::string					host;
 	std::vector<std::string>	server_names;
@@ -72,6 +72,6 @@ class Exception : public std::exception {
 		const char* what() const _NOEXCEPT { return exception_msg.c_str(); }
 };
 
-std::vector<server> getServersInfos(std::string configFilePath);
+std::vector<config> getServersInfos(std::string configFilePath);
 
 #endif

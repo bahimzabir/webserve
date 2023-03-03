@@ -17,7 +17,6 @@ bool	is_special(char c) {
 		return true;
 	return false;
 }
-
 bool is_digit(std::string str)
 {
 	for (int i = 0; i < str.length(); i++)
@@ -73,7 +72,7 @@ std::vector<std::string>	readFile(std::string file_path) {
 	return cmd;
 }
 
-std::vector<server> getServersInfos(std::string configFilePath) {
+std::vector<config> getServersInfos(std::string configFilePath) {
 
 	int							parce_scoop = OUT_SCOOP;
 	int							servers_index = -1;
@@ -81,7 +80,7 @@ std::vector<server> getServersInfos(std::string configFilePath) {
 	int							routes_index = -1;
 	int							cgi_pass_index = -1;
 	std::vector<std::string>	cmd;
-	std::vector<server>			servers;
+	std::vector<config>			servers;
 
 	cmd = readFile(configFilePath);
 	for (int i = 0;  i < cmd.size(); i++) {
@@ -103,7 +102,7 @@ std::vector<server> getServersInfos(std::string configFilePath) {
 			}
 			parce_scoop = SERVER_SCOOP;
 			servers_index++;
-			servers.push_back(server());
+			servers.push_back(config());
 		}
 		else if (parce_scoop == SERVER_SCOOP) {
 			while (i < cmd.size()) {
@@ -286,12 +285,12 @@ std::vector<server> getServersInfos(std::string configFilePath) {
 }
 
 
-int main(int arc, char** av) {
-	std::vector<server>	servers;
-	try {
-		servers = getServersInfos(av[1]);
-		std::cout << "Number of servers: " << servers[4].routes[0]. <<"\n";
-	} catch (std::exception& obj) {
-		std::cout << obj.what();
-	}
-}
+// int main(int arc, char** av) {
+// 	std::vector<config>	servers;
+// 	try {
+// 		servers = getServersInfos(av[1]);
+// 		std::cout << "Number of servers: " << servers.size() <<"\n";
+// 	} catch (std::exception& obj) {
+// 		std::cout << obj.what();
+// 	}
+// }
