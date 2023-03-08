@@ -13,7 +13,7 @@ servers::servers(const std::string *hosts,const std::string *ports,int len)
             p.events = POLLIN;
             p.revents = 0;
             fd_poll.push_back(p);
-            data[i].type = REQUEST;
+            data[i].type = LISTENER;
         }
         catch(int x)
         {
@@ -25,11 +25,7 @@ servers::servers(const std::string *hosts,const std::string *ports,int len)
 }
 int servers::deploy()
 {
-    struct pollfd p;
-    void (servers::*handlers[4])(int) = {&servers::listener_handler,&servers::client_req_handler,&servers::client_res_handler};
-    p.events = POLLIN;
-    p.revents = 0;
-    char buffer[1000];
+    void (servers::*handlers[4])(int &) = {&servers::listener_handler,&servers::client_req_handler,&servers::client_res_handler};
     int num_of_revents;
 
     while (1)

@@ -1,8 +1,10 @@
+#pragma once
 #include <iostream>
 #include <vector>
 #include <algorithm>
 #include <iostream>  
 #include <sstream>
+#include <sys/socket.h>
 
 struct http_request
 {
