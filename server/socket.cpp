@@ -17,7 +17,7 @@ _socket::_socket(const std::string &host,const std::string &port)
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     int err;
-    std::cout << host.c_str() << std::endl;
+    std::cout << host.c_str() << ":" << port.c_str() << std::endl;
     err = getaddrinfo(host.c_str(),port.c_str(),&hints,&addr);
     if (err != 0)
     {

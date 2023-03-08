@@ -4,6 +4,7 @@
 #include <poll.h>
 #include "../http/http_request.hpp"
 #include "../http/http_response_generator.hpp"
+#include "../parcing/parcer.hpp"
 
 #define LISTENER 0
 #define REQUEST 1
@@ -32,7 +33,7 @@ class servers
     
     //std::vector<servers> configs;
     public:
-        servers(const std::string *host,const std::string *ports,int len);
+        servers(std::vector<config> &config_info);
         void client_req_handler(int &index);
         void client_res_handler(int &index);
         void listener_handler(int &index);

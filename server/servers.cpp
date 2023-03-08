@@ -1,25 +1,28 @@
 #include "servers.hpp"
 
-servers::servers(const std::string *hosts,const std::string *ports,int len)
+servers::servers(std::vector<config> &config_info)
 {
     pollfd p;
-    for (int i = 0;i < len;i++)
+    for (int i = 0;i < config_info.size();i++)
     {
-        try
+        for (int port_index = 0; port_index < config_info[i].ports.size();port_index++)
         {
-            data.push_back(t_data());
-            sockets.push_back(_socket(hosts[i],ports[i]));
-            p.fd = sockets[i].get_socket_fd();
-            p.events = POLLIN;
-            p.revents = 0;
-            fd_poll.push_back(p);
-            data[i].type = LISTENER;
-        }
-        catch(int x)
-        {
-            if (x < 0)
-                close(x);
-            std::cout << "error" << std::endl;
+            try
+            {
+                data.push_back(t_data());
+                sockets.push_back(_socket(config_info[i].host,config_info[i].ports[i]));
+                p.fd = sockets[i].get_socket_fd();
+                p.events = POLLIN;
+                p.revents = 0;
+                fd_poll.push_back(p);
+                data[i].type = LISTENER;
+            }
+            catch(int x)
+            {
+                if (x < 0)
+                    close(x);
+                std::cout << "error" << std::endl;
+            }
         }
     }
 }

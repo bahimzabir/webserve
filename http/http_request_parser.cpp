@@ -54,10 +54,4 @@ void parse_headers(http_request &request)
 void http_parser(http_request &request)
 {
     parse_headers(request);
-    for (int i = 0;i < request.headers.size();i++)
-    {
-        std::cout << request.headers[i].first << "  ,  " << request.headers[i].second << std::endl;
-    }
-    std::cout << request.body << std::endl;
-    std::cout << request.http_header[0] << ',' << request.http_header[1] << ',' << request.http_header[2] << std::endl;
 }

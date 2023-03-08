@@ -151,14 +151,17 @@ void http_response::GET_handler()
     }
     if (state == BODY)
     {
-        std::string buffer;
-        getline(file,buffer,'\0');
-        std::cout << body.size() << std::endl;
+        char buffer[1001];
+        file.read(buffer,1000);
+        std::cout << file.gcount() << std::endl;
+        std::cout <<body.size() << std::endl;
+        buffer[file.gcount()] = 0;
         body += buffer;
+
         if (file.eof())//ended file generation
         {
-            body += "\n";
             type = SEND;
+            body += '\n';
             headers["Content-Length"] = int_to_string(body.size());
             std::string ext = request.http_header[1].substr(request.http_header[1].find_last_of(".") + 1);
             if (ext != request.http_header[1] && headers.find(ext) != headers.end())
@@ -170,6 +173,11 @@ void http_response::GET_handler()
                 res_header +=  (*it).first + ":" + (*it).second + "\n";
             res_header += "\n";
             std::cout << res_header << "---------" << std::endl;
+        }
+        else if (!file.good())
+        {
+            std::cout << "fail" << std::endl;
+            throw 200;
         }
     }
 }
