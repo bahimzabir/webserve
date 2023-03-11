@@ -2,8 +2,8 @@
 #include "socket.hpp"
 #include <vector>
 #include <poll.h>
-#include "../http/http_request.hpp"
-#include "../http/http_response_generator.hpp"
+#include "./http/http_request.hpp"
+#include "./http/http_response.hpp"
 #include "../parcing/parcer.hpp"
 
 #define LISTENER 0

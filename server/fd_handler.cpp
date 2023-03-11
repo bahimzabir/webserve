@@ -1,26 +1,38 @@
 #include "servers.hpp"
 
+
+int count_nl (char *str)
+{
+    int nl = 0;
+    while (*str)
+    {
+        nl += ((*str) == '\n');
+        str++;
+    }
+    return nl;
+}
+
 void servers::client_req_handler(int &index)
 {
     if (!(fd_poll[index].revents & POLLIN))
         return ;
     std::cout << "REQUEST" << std::endl;//error in cout
-    char buffer[1000];
+    char buffer[1025];
     int ret;
-    ret = recv(fd_poll[index].fd,buffer,1000,0);
+    ret = recv(fd_poll[index].fd,buffer,1024,0);
     if (ret == -1)
         throw "client error";
     buffer[ret] = 0;
-    data[index].request.req += buffer;
-    if (ret == 0 || ret < 1000)
+    std::cout << "blan\n" << std::endl;
+    data[index].request.parse_remaining(buffer,ret,count_nl(buffer));
+    std::cout << "blan\n" << std::endl;
+    if (ret == 0 || ret < 1024)
     {
-        http_parser(data[index].request);
         fd_poll[index].events = POLLOUT;
         data[index].type = RESPONSE;
         data[index].response = new http_response(data[index].request,fd_poll[index].fd);
         return;
     }
-    std::cout << "blan\n" << std::endl;
 }
 
 void servers::client_res_handler(int &index)

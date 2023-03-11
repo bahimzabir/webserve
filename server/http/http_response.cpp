@@ -1,9 +1,5 @@
-#include "http_response_generator.hpp"
+#include "http_response.hpp"
 
-#define GET 0
-#define POST 1
-#define DELETE 2
-#define SEND 3
 
 
 
@@ -110,10 +106,11 @@ http_response::http_response(http_request &req,int fd) : request(req)
     for (int i = 0;i < 3;i++)
     {
         type = Types[i];
-        if (methods[i] == request.http_header[0])
+        if (methods[i] == request.get_method())
             break;
     }
-    state = HEADERS;
+    state = OPEN_STREAM
+    ;
     client_fd = fd;
 }
 
@@ -122,65 +119,10 @@ void http_response::generate_response()
 {
     void (http_response::*handlers[4])() = {&http_response::GET_handler,&http_response::POST_handler,&http_response::DELETE_handler,&http_response::SEND_handler};
 
-    if (state == HEADERS)
-    {
-        state = OPEN_STREAM;
-    }
     (this->*handlers[type])();
 }
 
-std::string int_to_string(int a)
-{
-    std::stringstream temp;
-    temp << a;
-    return temp.str();
-}
 
-void http_response::GET_handler()
-{
-    std::cout << "GET_H" << std::endl;
-    if (state == OPEN_STREAM)
-    {
-        std::string file_path = "/Users/hait-moh/Desktop/webserv/webserve" + request.http_header[1];
-        std::cout << file_path << std::endl;
-        file.open(file_path);
-        std::cout << file.good() << std::endl;
-        if (!file.good())
-            throw 200;
-        state = BODY;
-    }
-    if (state == BODY)
-    {
-        char buffer[1001];
-        file.read(buffer,1000);
-        std::cout << file.gcount() << std::endl;
-        std::cout <<body.size() << std::endl;
-        buffer[file.gcount()] = 0;
-        body += buffer;
-
-        if (file.eof())//ended file generation
-        {
-            type = SEND;
-            body += '\n';
-            headers["Content-Length"] = int_to_string(body.size());
-            std::string ext = request.http_header[1].substr(request.http_header[1].find_last_of(".") + 1);
-            if (ext != request.http_header[1] && headers.find(ext) != headers.end())
-                headers["Content-Type"] = content_type[ext];
-            else
-                headers["Content-Type"] = "text/plain";
-            res_header += "HTTP/1.1 200 OK\n";
-            for (std::map<std::string,std::string>::iterator it = headers.begin(); it != headers.end(); it++)
-                res_header +=  (*it).first + ":" + (*it).second + "\n";
-            res_header += "\n";
-            std::cout << res_header << "---------" << std::endl;
-        }
-        else if (!file.good())
-        {
-            std::cout << "fail" << std::endl;
-            throw 200;
-        }
-    }
-}
 void http_response::SEND_handler()
 {
     int ret;
@@ -201,16 +143,9 @@ void http_response::SEND_handler()
         throw 200;
 }
 
-void http_response::POST_handler()
+std::string int_to_string(int a)
 {
-    if (state == OPEN_STREAM)
-    {
-
-    }
-
-}
-void http_response::DELETE_handler()
-{
-    if (state == OPEN_STREAM)
-        state = BODY;
+    std::stringstream temp;
+    temp << a;
+    return temp.str();
 }

@@ -5,11 +5,17 @@
 #include <map>
 #include <fstream>
 
-#define HEADERS 1
-#define OPEN_STREAM 2
-#define BODY 3
-#define ERROR 4
-#define END 5
+#define OPEN_STREAM 1
+#define RESPONSE_BODY 2
+#define RESPONSE_ERROR 3
+#define END 4
+
+
+
+#define GET 0
+#define POST 1
+#define DELETE 2
+#define SEND 3
 
 
 
@@ -27,16 +33,17 @@ class http_response
     int client_fd;
     int type;
     int state;
+    void add_headers();
+    void GET_handler();
+    void POST_handler();
+    void DELETE_handler();
+    void SEND_handler();
+    void ERROR_handler();
     public:
         http_response(http_request &req,int fd);
-        void GET_handler();
-        void POST_handler();
-        void DELETE_handler();
-        void SEND_handler();
-        void ERROR_handler();
         void generate_response();
-        void add_headers();
+
 };
 
-
+std::string int_to_string(int a);
 

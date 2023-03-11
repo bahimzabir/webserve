@@ -3,19 +3,20 @@
 servers::servers(std::vector<config> &config_info)
 {
     pollfd p;
+    t_data d;
+    d.type = LISTENER;
     for (int i = 0;i < config_info.size();i++)
     {
         for (int port_index = 0; port_index < config_info[i].ports.size();port_index++)
         {
             try
             {
-                data.push_back(t_data());
+                data.push_back(d);
                 sockets.push_back(_socket(config_info[i].host,config_info[i].ports[i]));
                 p.fd = sockets[i].get_socket_fd();
                 p.events = POLLIN;
                 p.revents = 0;
                 fd_poll.push_back(p);
-                data[i].type = LISTENER;
             }
             catch(int x)
             {
