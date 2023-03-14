@@ -72,6 +72,8 @@ void http_request::parse_remaining(char *buffer,int len, int n_new_line)
     std::cout << "dkhlat" << state << std::endl;
     (this->*handlers[state])();
 }
+
+
 http_request &http_request::operator=(const http_request &obj)
 {
     state = obj.state;

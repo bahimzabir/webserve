@@ -10,10 +10,12 @@ servers::servers(std::vector<config> &config_info)
         for (int port_index = 0; port_index < config_info[i].ports.size();port_index++)
         {
             try
-            {
-                data.push_back(d);
+            {   
                 sockets.push_back(_socket(config_info[i].host,config_info[i].ports[i]));
+                d.conf = &(config_info[i]);
+                data.push_back(d);
                 p.fd = sockets[i].get_socket_fd();
+                
                 p.events = POLLIN;
                 p.revents = 0;
                 fd_poll.push_back(p);

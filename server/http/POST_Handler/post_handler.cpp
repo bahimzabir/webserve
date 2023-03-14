@@ -2,9 +2,5 @@
 
 void http_response::POST_handler()
 {
-    if (state == OPEN_STREAM)
-    {
-
-    }
-
+    
 }

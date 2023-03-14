@@ -3,7 +3,7 @@
 
 
 
-http_response::http_response(http_request &req,int fd) : request(req)
+http_response::http_response(http_request &req,int fd,config *con) : request(req)
 {
     content_type["html"] =  "text/html";
     content_type["htm"] =  "text/html";
@@ -101,7 +101,7 @@ http_response::http_response(http_request &req,int fd) : request(req)
     content_type["wmv"] =  "video/x-ms-wmv";
     content_type["avi"] =  "video/x-msvideo";
     std::string methods[3] = {"GET","POST","DELETE"};
-    
+
     int Types[3] = {GET,POST,DELETE};
     for (int i = 0;i < 3;i++)
     {
@@ -109,9 +109,25 @@ http_response::http_response(http_request &req,int fd) : request(req)
         if (methods[i] == request.get_method())
             break;
     }
-    state = OPEN_STREAM
-    ;
+    check_state();
     client_fd = fd;
+}
+
+void http_response::check_state()
+{
+    struct stat s;
+
+    std::cout << "/Users/hait-moh/Desktop/webserv/webserve" + request.get_path() << std::endl;
+    if (stat(("/Users/hait-moh/Desktop/webserv/webserve" + request.get_path()).c_str(),&s) == 0)
+    {
+        if (S_ISDIR(s.st_mode))
+            state = DIRECTORY;
+        else
+            state = FILE;
+    }
+    else
+        throw 200;
+    printf("blan akhor\n");
 }
 
 

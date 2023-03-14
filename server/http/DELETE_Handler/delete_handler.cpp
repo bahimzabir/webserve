@@ -2,6 +2,6 @@
 
 void http_response::DELETE_handler()
 {
-    if (state == OPEN_STREAM)
+    if (state == FILE)
         state = RESPONSE_BODY;
 }

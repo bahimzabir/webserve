@@ -30,7 +30,20 @@ void servers::client_req_handler(int &index)
     {
         fd_poll[index].events = POLLOUT;
         data[index].type = RESPONSE;
-        data[index].response = new http_response(data[index].request,fd_poll[index].fd);
+        try
+        {
+            data[index].response = new http_response(data[index].request,fd_poll[index].fd,data[index].conf);
+        }
+        catch (int x)
+        {
+            if (x == 200)
+            {
+                close(fd_poll[index].fd);
+                fd_poll.erase(fd_poll.begin() + index);
+                data.erase(data.begin() + index);
+                index--;
+            }
+        }
         return;
     }
 }
@@ -77,6 +90,7 @@ void servers::listener_handler(int &index)
         p.events = POLLIN;
         p.revents = 0;
         fd_poll.push_back(p);
+        d.conf = data[index].conf;
         data.push_back(d);
     }
 }

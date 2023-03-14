@@ -9,9 +9,6 @@
 #define LISTENER 0
 #define REQUEST 1
 #define RESPONSE 2
-#define FILE 3
-#define UPLOAD 4
-#define CGI 5
 
 #define POLLBOTH (POLLIN | POLLOUT)
 
@@ -21,6 +18,7 @@ struct t_data
     int type;
     http_request request;
     http_response *response;
+    config *conf;
 };
 
 
