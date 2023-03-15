@@ -41,6 +41,30 @@ std::string line_num(std::vector<std::string> cmd, int i) {
 	return std::to_string(line_num);
 }
 
+void	add_default_params(config& conf, config& deflt) {
+	
+	conf.ports = conf.ports.empty() ? deflt.ports : conf.ports;
+	conf.host = conf.host.empty() ? deflt.host : conf.host;
+	conf.server_names = conf.server_names.empty() ? deflt.server_names : conf.server_names;
+	conf.client_max_body_size = conf.client_max_body_size.empty() ? deflt.client_max_body_size : conf.client_max_body_size;
+	conf.error_pages = conf.error_pages.empty() ? deflt.error_pages : conf.error_pages;
+	if (conf.routes.empty()) 
+		conf.routes = deflt.routes;
+	else {
+		for (std::vector<route>::iterator it = conf.routes.begin(); it != conf.routes.end(); it++) {
+			route &rt = *it;
+			rt.autoindex = rt.autoindex.empty() ? deflt.routes[0].autoindex : rt.autoindex;
+			rt.methods = rt.methods.empty() ? deflt.routes[0].methods : rt.methods;
+			rt.root = rt.root.empty() ? deflt.routes[0].root : rt.root;
+			rt.return_value = rt.return_value.empty() ? deflt.routes[0].return_value : rt.return_value;
+			rt.index = rt.index.empty() ? deflt.routes[0].index : rt.index;
+			rt.route_name = rt.route_name.empty() ? deflt.routes[0].route_name : rt.route_name;
+			rt.upload_pass = rt.upload_pass.empty() ? deflt.routes[0].upload_pass : rt.upload_pass;
+			rt.cgi_pass = rt.cgi_pass.empty() ? deflt.routes[0].cgi_pass : rt.cgi_pass;
+		}
+	}
+}
+
 std::vector<std::string>	readFile(std::string file_path) {
 
 	std::fstream				file;
