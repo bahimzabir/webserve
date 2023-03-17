@@ -100,6 +100,10 @@ int	getStringValue(std::string& configFilePath, std::string& toReplace, std::vec
 	i++;
 	if (cmd[i] == ";" || cmd[i] == "\n")
 		throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": no Host defined for the server\n");
+	if (toGet == "autoindex" && cmd[i] != "0" && cmd[i] != "1")
+		throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": 'autoindex' has to be 0 or 1\n");
+	if ((toGet == "max_client_body_size" || toGet == "autoindex") && !is_digit(cmd[i]))
+		throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": '" + toGet + "' has to be a number\n");
 	toReplace = cmd[i++];
 	if (cmd[i] == "\n")
 		throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": ';' is expected\n");
