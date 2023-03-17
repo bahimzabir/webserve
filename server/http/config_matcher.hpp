@@ -16,7 +16,7 @@ struct config_match
 	std::vector<errorPage>		error_pages;
     std::string                 return_value;
 };
-config_match& get_config(std::string host, std::string port, std::string rout, std::string server_name, std::vector<config> config_info, config& def);
+config_match& get_config(std::string host, std::string port, std::string rout, std::string server_name, std::vector<config>& config_info, config& def);
 
 
 //(ip,port,directory,domain-name)
