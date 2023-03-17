@@ -39,9 +39,6 @@ struct route
 	std::string					root;
 	std::string					return_value;
 	std::vector<std::string>	index;
-
-	// TO BE DEFINED:
-
 	std::string					autoindex;
 	std::string					upload_pass;
 	std::vector<cgi>			cgi_pass;
@@ -54,11 +51,6 @@ struct config {
 	std::string					client_max_body_size;
 	std::vector<route>			routes;
 	std::vector<errorPage>		error_pages;
-
-	//config file parcing status variables:
-
-	bool						seccessParce;
-	std::string					parceMsg;
 };
 
 class Exception : public std::exception {

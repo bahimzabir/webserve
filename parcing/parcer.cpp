@@ -96,6 +96,19 @@ std::vector<std::string>	readFile(std::string file_path) {
 	return cmd;
 }
 
+int	getStringValue(std::string& configFilePath, std::string& toReplace, std::vector<std::string>& cmd, std::string toGet, int servers_index, int i) {
+	i++;
+	if (cmd[i] == ";" || cmd[i] == "\n")
+		throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": no Host defined for the server\n");
+	toReplace = cmd[i++];
+	if (cmd[i] == "\n")
+		throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": ';' is expected\n");
+	if (cmd[i] != ";")
+		throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": too many arguments for '" + toGet + "'\n");
+	i++;
+	return i;
+}
+
 std::vector<config> getServersInfos(std::string configFilePath) {
 
 	int							parce_scoop = OUT_SCOOP;
@@ -153,25 +166,9 @@ std::vector<config> getServersInfos(std::string configFilePath) {
 						i++;
 					}
 				} else if (cmd[i] == "host") {
-					i++;
-					if (cmd[i] == ";" || cmd[i] == "\n")
-						throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": no Host defined for the server\n");
-					while (cmd[i] != ";") {
-						servers[servers_index].host = cmd[i];
-						if (cmd[i] == "\n")
-							throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": ';' is expected\n");
-						i++;
-					}
+					i = getStringValue(configFilePath, servers[servers_index].host, cmd, "host", servers_index, i);
 				} else if (cmd[i] == "max_client_body_size") {
-					i++;
-					if (cmd[i] == ";" || cmd[i] == "\n")
-						throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": no 'max_client_body_size' defined for the server\n");
-					while (cmd[i] != ";") {
-						servers[servers_index].client_max_body_size = cmd[i];
-						if (cmd[i] == "\n")
-							throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": ';' is expected\n");
-						i++;
-					}
+					i = getStringValue(configFilePath, servers[servers_index].client_max_body_size, cmd, "max_client_body_size", servers_index, i);
 				} else if (cmd[i] == "error_page") {
 					i++;
 					servers[servers_index].error_pages.push_back(errorPage());
@@ -229,49 +226,13 @@ std::vector<config> getServersInfos(std::string configFilePath) {
 							i++;
 							}
 						}else if (cmd[i] == "autoindex") {
-							i++;
-							if (cmd[i] == ";" || cmd[i] == "\n")
-								throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": no 'autoindex' defined for the route\n");
-							servers[servers_index].routes[routes_index].autoindex = cmd[i];
-							i++;
-							if (cmd[i] == "\n")
-									throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": ';' is expected\n");
-							if (cmd[i] != ";")
-									throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": too many arguments for 'autoindex'\n");
-						 	i++;
+							i = getStringValue(configFilePath, servers[servers_index].routes[routes_index].autoindex, cmd, "autoindex", servers_index, i);
 						}else if (cmd[i] == "root") {
-							i++;
-							if (cmd[i] == ";" || cmd[i] == "\n")
-								throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": no 'root' defined for the route\n");
-							servers[servers_index].routes[routes_index].root = cmd[i];
-							i++;
-							if (cmd[i] == "\n")
-									throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": ';' is expected\n");
-							if (cmd[i] != ";")
-									throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": too many arguments for 'root'\n");
-							i++;
+							i = getStringValue(configFilePath, servers[servers_index].routes[routes_index].root, cmd, "root", servers_index, i);
 						}else if (cmd[i] == "upload_pass") {
-							i++;
-							if (cmd[i] == ";" || cmd[i] == "\n")
-								throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": no 'upload_pass' defined for the route\n");
-							servers[servers_index].routes[routes_index].upload_pass = cmd[i];
-							i++;
-							if (cmd[i] == "\n")
-									throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": ';' is expected\n");
-							if (cmd[i] != ";")
-									throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": too many arguments for 'upload_pass'\n");
-							i++;
+							i = getStringValue(configFilePath, servers[servers_index].routes[routes_index].upload_pass, cmd, "upload_pass", servers_index, i);
 						} else if (cmd[i] == "return") {
-							i++;
-							if (cmd[i] == ";" || cmd[i] == "\n")
-								throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": no 'return' defined for the route\n");
-							servers[servers_index].routes[routes_index].return_value = cmd[i];
-							i++;
-							if (cmd[i] == "\n")
-									throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": ';' is expected\n");
-							if (cmd[i] != ";")
-									throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": too many arguments for 'return'\n");
-							i++;
+							i = getStringValue(configFilePath, servers[servers_index].routes[routes_index].return_value, cmd, "return", servers_index, i);
 						} else if (cmd[i] == "cgi_pass") {
 							i++;
 							servers[servers_index].routes[routes_index].cgi_pass.push_back(cgi());
