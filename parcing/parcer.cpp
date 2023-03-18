@@ -41,6 +41,12 @@ std::string line_num(std::vector<std::string> cmd, int i) {
 	return std::to_string(line_num);
 }
 
+void scoopCheck(std::vector<std::string> cmd) {
+	int i = 0;
+
+
+}
+
 void	add_default_params(config& conf, config& deflt) {
 	
 	conf.ports = conf.ports.empty() ? deflt.ports : conf.ports;
@@ -261,7 +267,7 @@ std::vector<config> getServersInfos(std::string configFilePath) {
 					}
 				} else if (cmd[i] == "}") {
 					parce_scoop = OUT_SCOOP;
-					i++;
+					//i++;
 					break;
 				}
 				else
