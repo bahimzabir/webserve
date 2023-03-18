@@ -41,9 +41,17 @@ std::string line_num(std::vector<std::string> cmd, int i) {
 	return std::to_string(line_num);
 }
 
-void scoopCheck(std::vector<std::string> cmd) {
-	int i = 0;
-
+void scoopCheck(std::vector<std::string> cmd, std::string configFilePath) {
+	int s = cmd.size();
+	int scoop = 0;
+	for (int i = 0; i < s; i++) {
+		if (cmd[i] == "{")
+			scoop ++;
+		else if(cmd[i] == "}")
+			scoop --;
+		if (scoop < 0 || scoop > 2)
+			throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": '" + cmd[i] + "' unexpected here\n");
+	}
 
 }
 
@@ -130,6 +138,7 @@ std::vector<config> getServersInfos(std::string configFilePath) {
 	std::vector<config>			servers;
 
 	cmd = readFile(configFilePath);
+	scoopCheck(cmd, configFilePath);
 	for (int i = 0;  i < cmd.size(); i++) {
 		error_pages_index = -1;
 		routes_index = -1;
