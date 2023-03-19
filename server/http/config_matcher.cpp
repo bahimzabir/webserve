@@ -6,7 +6,7 @@ config_match& config_struct_fill(route& rout, long cmbs, std::map<int, std::stri
 
 	conf->methods = rout.methods;
 	conf->client_max_body_size = cmbs;
-	conf->root = rout.root + rout.route_name;
+	conf->root = rout.route_name;
 	conf->index = rout.index;
 	conf->autoindex = rout.autoindex;
 	conf->upload_pass = rout.upload_pass;
@@ -22,6 +22,7 @@ config_match& get_config(std::string host, std::string port, std::string rout, s
 	config* match_lvl1 = NULL;
 	config* match_lvl2 = NULL;
 	config* match_lvl3 = NULL;
+	config* match_lvl4 = &config_info.back();
 	std::vector<route>::iterator r_it;
 	route rt;
 	for (std::vector<config>::reverse_iterator it = config_info.rbegin(); it != config_info.rend(); it++) {
@@ -45,23 +46,12 @@ config_match& get_config(std::string host, std::string port, std::string rout, s
 		}
 	}
 
-	//std::cerr << "debug = "<< match_lvl3->host << "\n";
-	
-
 	if (match_lvl3)
-	{
-		std::cerr << "here\n";
-		// std::cerr << match_lvl3.size() << "\n";
 		return (config_struct_fill(rt, match_lvl3->client_max_body_size, match_lvl3->error_pages));
-	}else if(match_lvl2)
-	{
-		return (config_struct_fill(*g_def.routes.begin(), match_lvl2->client_max_body_size, match_lvl2->error_pages));
-	}else if (match_lvl1)
-	{
-		return (config_struct_fill(*g_def.routes.begin(), match_lvl1->client_max_body_size, match_lvl1->error_pages));
-	}else
-	{
-		return (config_struct_fill(*g_def.routes.begin(), g_def.client_max_body_size, g_def.error_pages));
-	}
-	// std::cerr << "here\n";
+	else if(match_lvl2)
+		return (config_struct_fill(*match_lvl4->routes.begin(), match_lvl2->client_max_body_size, match_lvl2->error_pages));
+	else if(match_lvl1)
+		return (config_struct_fill(*match_lvl4->routes.begin(), match_lvl1->client_max_body_size, match_lvl1->error_pages));
+	else
+		return (config_struct_fill(*match_lvl4->routes.begin(), match_lvl4->client_max_body_size, match_lvl4->error_pages));
 }

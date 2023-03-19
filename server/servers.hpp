@@ -37,4 +37,4 @@ class servers
         int deploy();
 };
 
-void server_init(std::vector<config>& configs);
+void server_init();
