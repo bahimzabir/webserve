@@ -37,22 +37,29 @@ std::string line_num(std::vector<std::string> cmd, int i) {
 			line_num++;
 		j++;
 	}
-
 	return std::to_string(line_num);
 }
 
 void scoopCheck(std::vector<std::string> cmd, std::string configFilePath) {
 	int s = cmd.size();
 	int scoop = 0;
+	int j;
 	for (int i = 0; i < s; i++) {
 		if (cmd[i] == "{")
+		{
 			scoop ++;
+			j++;
+		}
 		else if(cmd[i] == "}")
+		{
 			scoop --;
+			j++;
+		}
 		if (scoop < 0 || scoop > 2)
 			throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": '" + cmd[i] + "' unexpected here\n");
 	}
-
+	if (scoop != 0)
+		throw Exception(configFilePath + ": ERROR: unclosed scoop\n");
 }
 
 void	add_default_params(config& conf, config& deflt) {
@@ -60,14 +67,13 @@ void	add_default_params(config& conf, config& deflt) {
 	conf.ports = conf.ports.empty() ? deflt.ports : conf.ports;
 	conf.host = conf.host.empty() ? deflt.host : conf.host;
 	conf.server_names = conf.server_names.empty() ? deflt.server_names : conf.server_names;
-	conf.client_max_body_size = conf.client_max_body_size.empty() ? deflt.client_max_body_size : conf.client_max_body_size;
-	conf.error_pages = conf.error_pages.empty() ? deflt.error_pages : conf.error_pages;
+	//conf.client_max_body_size = conf.client_max_body_size.empty() ? deflt.client_max_body_size : conf.client_max_body_size;
+	conf.err_pages_struct = conf.err_pages_struct.empty() ? deflt.err_pages_struct : conf.err_pages_struct;
 	if (conf.routes.empty()) 
 		conf.routes = deflt.routes;
 	else {
 		for (std::vector<route>::iterator it = conf.routes.begin(); it != conf.routes.end(); it++) {
 			route &rt = *it;
-			rt.autoindex = rt.autoindex.empty() ? deflt.routes[0].autoindex : rt.autoindex;
 			rt.methods = rt.methods.empty() ? deflt.routes[0].methods : rt.methods;
 			rt.root = rt.root.empty() ? deflt.routes[0].root : rt.root;
 			rt.return_value = rt.return_value.empty() ? deflt.routes[0].return_value : rt.return_value;
@@ -114,11 +120,26 @@ int	getStringValue(std::string& configFilePath, std::string& toReplace, std::vec
 	i++;
 	if (cmd[i] == ";" || cmd[i] == "\n")
 		throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": no Host defined for the server\n");
+	toReplace = cmd[i++];
+	if (cmd[i] == "\n")
+		throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": ';' is expected\n");
+	if (cmd[i] != ";")
+		throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": too many arguments for '" + toGet + "'\n");
+	i++;
+	return i;
+}
+
+int	getDigitValue(std::string& configFilePath, long *toReplace, std::vector<std::string>& cmd, std::string toGet, int servers_index, int i) {
+	i++;
+	if (cmd[i] == ";" || cmd[i] == "\n")
+		throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": no Host defined for the server\n");
 	if (toGet == "autoindex" && cmd[i] != "0" && cmd[i] != "1")
 		throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": 'autoindex' has to be 0 or 1\n");
-	if ((toGet == "max_client_body_size" || toGet == "autoindex") && !is_digit(cmd[i]))
+	if (!is_digit(cmd[i]))
 		throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": '" + toGet + "' has to be a number\n");
-	toReplace = cmd[i++];
+	*toReplace = std::atol(cmd[i++].c_str());
+	if (errno == ERANGE)
+		throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": '" + toGet + "' is more than is too large (MAX = 9.223.372 TB)\n");
 	if (cmd[i] == "\n")
 		throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": ';' is expected\n");
 	if (cmd[i] != ";")
@@ -131,7 +152,7 @@ std::vector<config> getServersInfos(std::string configFilePath) {
 
 	int							parce_scoop = OUT_SCOOP;
 	int							servers_index = -1;
-	int							error_pages_index = -1;
+	int							err_pages_struct_index = -1;
 	int							routes_index = -1;
 	int							cgi_pass_index = -1;
 	std::vector<std::string>	cmd;
@@ -140,21 +161,22 @@ std::vector<config> getServersInfos(std::string configFilePath) {
 	cmd = readFile(configFilePath);
 	scoopCheck(cmd, configFilePath);
 	for (int i = 0;  i < cmd.size(); i++) {
-		error_pages_index = -1;
+		err_pages_struct_index = -1;
 		routes_index = -1;
 		while(i < cmd.size() && cmd[i] == "\n")
 			i++;
 		if (i >= cmd.size())
 			break;
 		if (parce_scoop == OUT_SCOOP) {
-			if (cmd[i] != "server") {
+			if (cmd[i++] != "server") {
 				throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": '" +cmd[i] +"' is undefined, Do you mean 'server'\n");
 			}
 			parce_scoop = PRE_SERVER_SCOOP;
-		}
-		else if (parce_scoop == PRE_SERVER_SCOOP) {
-			if (cmd[i] != "{") {
-				throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": '" +cmd[i] +"' is undefined, '{' is expected after 'server' definition\n");
+			while(i < cmd.size() && cmd[i] == "\n")
+				i++;
+			//std::cerr << cmd[i] <<"here\n";
+			if (i >= cmd.size() || cmd[i] != "{") {
+				throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": '{' is expected after 'server' definition\n");
 			}
 			parce_scoop = SERVER_SCOOP;
 			servers_index++;
@@ -187,17 +209,17 @@ std::vector<config> getServersInfos(std::string configFilePath) {
 				} else if (cmd[i] == "host") {
 					i = getStringValue(configFilePath, servers[servers_index].host, cmd, "host", servers_index, i);
 				} else if (cmd[i] == "max_client_body_size") {
-					i = getStringValue(configFilePath, servers[servers_index].client_max_body_size, cmd, "max_client_body_size", servers_index, i);
+					i = getDigitValue(configFilePath, &servers[servers_index].client_max_body_size, cmd, "max_client_body_size", servers_index, i);
 				} else if (cmd[i] == "error_page") {
 					i++;
-					servers[servers_index].error_pages.push_back(errorPage());
-					error_pages_index++;
+					servers[servers_index].err_pages_struct.push_back(errorPage());
+					err_pages_struct_index++;
 					if (cmd[i] == ";" || cmd[i] == "\n" || !is_digit(cmd[i]))
 						throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": "+ cmd[i] +" 'error code' is invalid for the error_page\n");
-					servers[servers_index].error_pages[error_pages_index].error_num = cmd[i++];
+					servers[servers_index].err_pages_struct[err_pages_struct_index].error_num = cmd[i++];
 					if (cmd[i] == ";" || cmd[i] == "\n" )
 						throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": 'error page' is required\n");
-					servers[servers_index].error_pages[error_pages_index].error_file = cmd[i++];
+					servers[servers_index].err_pages_struct[err_pages_struct_index].error_file = cmd[i++];
 					if (cmd[i] == "\n")
 						throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": ';' is expected\n");
 					else if (cmd[i] != ";")
@@ -245,7 +267,7 @@ std::vector<config> getServersInfos(std::string configFilePath) {
 							i++;
 							}
 						}else if (cmd[i] == "autoindex") {
-							i = getStringValue(configFilePath, servers[servers_index].routes[routes_index].autoindex, cmd, "autoindex", servers_index, i);
+							i = getDigitValue(configFilePath, &servers[servers_index].routes[routes_index].autoindex, cmd, "autoindex", servers_index, i);
 						}else if (cmd[i] == "root") {
 							i = getStringValue(configFilePath, servers[servers_index].routes[routes_index].root, cmd, "root", servers_index, i);
 						}else if (cmd[i] == "upload_pass") {
@@ -276,7 +298,7 @@ std::vector<config> getServersInfos(std::string configFilePath) {
 					}
 				} else if (cmd[i] == "}") {
 					parce_scoop = OUT_SCOOP;
-					//i++;
+					i++;
 					break;
 				}
 				else
@@ -287,7 +309,6 @@ std::vector<config> getServersInfos(std::string configFilePath) {
 	}
 	return servers;
 }
-
 
 // int main(int arc, char** av) {
 // 	std::vector<config>	servers;

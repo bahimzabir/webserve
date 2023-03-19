@@ -22,7 +22,7 @@
 #define PRE_ROUTE_SCOOP 4
 #define PRE_ROUTE_NAME 5
 
-struct errorPage {
+struct errorPage : public std::map<int, std::string>{
 	std::string	error_num;
 	std::string	error_file;
 };
@@ -39,18 +39,20 @@ struct route
 	std::string					root;
 	std::string					return_value;
 	std::vector<std::string>	index;
-	std::string					autoindex;
+	long						autoindex;
 	std::string					upload_pass;
 	std::vector<cgi>			cgi_pass;
 };
 
 struct config {
-	std::vector<std::string>	ports;
-	std::string					host;
-	std::vector<std::string>	server_names;
-	std::string					client_max_body_size;
-	std::vector<route>			routes;
-	std::vector<errorPage>		error_pages;
+	std::vector<std::string>		ports;
+	std::string						host;
+	std::vector<std::string>		server_names;
+	long							client_max_body_size;
+	std::vector<route>				routes;
+	std::vector<errorPage>			err_pages_struct;
+	// to be defined
+	std::map<int, std::string>		error_pages;
 };
 
 class Exception : public std::exception {
