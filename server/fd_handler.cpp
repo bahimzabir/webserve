@@ -26,24 +26,11 @@ void servers::client_req_handler(int &index)
     std::cout << "blan\n" << std::endl;
     data[index].request.parse_remaining(buffer,ret,count_nl(buffer));
     std::cout << "blan\n" << std::endl;
-    if (ret == 0 || ret < 1024)
+    if (data[index].request.get_state() == REQUEST_BODY)
     {
         fd_poll[index].events = POLLOUT;
         data[index].type = RESPONSE;
-        try
-        {
-            data[index].response = new http_response(data[index].request,fd_poll[index].fd,data[index].conf);
-        }
-        catch (int x)
-        {
-            if (x == 200)
-            {
-                close(fd_poll[index].fd);
-                fd_poll.erase(fd_poll.begin() + index);
-                data.erase(data.begin() + index);
-                index--;
-            }
-        }
+        data[index].response = new http_response(data[index].request,&(fd_poll[index]),data[index].conf);
         return;
     }
 }

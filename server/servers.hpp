@@ -12,7 +12,6 @@
 
 #define POLLBOTH (POLLIN | POLLOUT)
 
-
 struct t_data
 {
     int type;
@@ -20,7 +19,6 @@ struct t_data
     http_response *response;
     config *conf;
 };
-
 
 
 class servers

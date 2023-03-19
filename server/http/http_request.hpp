@@ -20,7 +20,6 @@ class http_request
     int remaining_nl;
     void http_header_handler();
     void headers_handler();
-    void body_handler();
     void push_header(std::string &line);
 
 
@@ -32,4 +31,5 @@ class http_request
         const std::string &get_method();
         const std::string &get_version();
         const std::string &get_path();
+        int get_state();
 };

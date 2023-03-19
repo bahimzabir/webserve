@@ -57,10 +57,9 @@ void http_request::headers_handler()
     //handle body;
 }
 
-void http_request::body_handler()
+int http_request::get_state()
 {
-    std::cout << "body" << std::endl;
-    return;
+    return state;
 }
 
 
@@ -68,7 +67,7 @@ void http_request::parse_remaining(char *buffer,int len, int n_new_line)
 {
     remaining_nl += n_new_line;
     remaining.write(buffer,len);
-    void (http_request::*handlers[3])() = {&http_request::http_header_handler,&http_request::headers_handler,&http_request::body_handler};
+    void (http_request::*handlers[2])() = {&http_request::http_header_handler,&http_request::headers_handler};
     std::cout << "dkhlat" << state << std::endl;
     (this->*handlers[state])();
 }

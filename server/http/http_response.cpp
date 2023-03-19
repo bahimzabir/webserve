@@ -3,7 +3,7 @@
 
 
 
-http_response::http_response(http_request &req,int fd,config *con) : request(req)
+http_response::http_response(http_request &req,struct pollfd *fd,config *con) : request(req)
 {
     content_type["html"] =  "text/html";
     content_type["htm"] =  "text/html";
@@ -100,42 +100,67 @@ http_response::http_response(http_request &req,int fd,config *con) : request(req
     content_type["asf"] =  "video/x-ms-asf";
     content_type["wmv"] =  "video/x-ms-wmv";
     content_type["avi"] =  "video/x-msvideo";
-    std::string methods[3] = {"GET","POST","DELETE"};
-
-    int Types[3] = {GET,POST,DELETE};
-    for (int i = 0;i < 3;i++)
-    {
-        type = Types[i];
-        if (methods[i] == request.get_method())
-            break;
-    }
+    std::map<std::string,int> met_map;
+    met_map["GET"] = GET;
+    met_map["POST"] = POST;
+    met_map["DELETE"] = DELETE;
+    
+    if (met_map.find(request.get_method()) == met_map.end())
+        throw NOT_IMPLEMENTED;
+    if (std::find(conf.methods.begin(),conf.methods.end(),request.get_method()) == conf.methods.end())
+        throw NOT_ALLOWED;
+    type = met_map[request.get_method()];
+    if (state == GET || state == DELETE)
+        client->events = POLLIN;
     check_state();
-    client_fd = fd;
+    client = fd;
 }
 
 void http_response::check_state()
 {
     struct stat s;
 
-    std::cout << "/Users/hait-moh/Desktop/webserv/webserve" + request.get_path() << std::endl;
-    if (stat(("/Users/hait-moh/Desktop/webserv/webserve" + request.get_path()).c_str(),&s) == 0)
+    std::cout << conf.root << std::endl;
+    if (stat(conf.root.c_str(),&s) == 0)
     {
         if (S_ISDIR(s.st_mode))
-            state = DIRECTORY;
+        {
+            for (int i = 0;i < conf.index.size();i++)
+            {
+                std::ifstream f(conf.root + "/" + conf.index[i]);
+                if (f.good())
+                {
+                    state = FILE;
+                    status[1] = "/" + conf.index[i];
+                    f.close();
+                    return;
+                }
+                f.close();
+            }
+            if (conf.autoindex)
+                state = LIST_DIRECTORY;
+            else
+                throw 403;
+        }
         else
             state = FILE;
     }
     else
-        throw 200;
-    printf("blan akhor\n");
+        throw 404;
 }
 
 
 void http_response::generate_response()
 {
-    void (http_response::*handlers[4])() = {&http_response::GET_handler,&http_response::POST_handler,&http_response::DELETE_handler,&http_response::SEND_handler};
-
-    (this->*handlers[type])();
+    void (http_response::*handlers[4])() = {&http_response::GET_handler,&http_response::POST_handler,&http_response::DELETE_handler,&http_response::SEND_handler,};
+    try
+    {
+        (this->*handlers[type])();
+    }
+    catch(int x)
+    {
+        ERROR_handler(x);
+    }
 }
 
 
@@ -143,21 +168,46 @@ void http_response::SEND_handler()
 {
     int ret;
     if (res_header != "")
-        ret = send(client_fd,res_header.c_str(),res_header.size(),0);
+        ret = send(client->fd,res_header.c_str(),res_header.size(),0);
     else
-        ret = send(client_fd,body.c_str(),body.size(),0);
+        ret = send(client->fd,body.c_str(),body.size(),0);
     if (ret == -1)
     {
-        std::cout << "error1234" << std::endl;
-        return;
+        throw 666;
     }
     if (res_header != "")
         res_header.erase(0,ret);
     else
         body.erase(0,ret);
     if (body == "")
-        throw 200;
+        throw 666;
 }
+
+void http_response::ERROR_handler(int x)
+{
+    res_header = "";
+    headers.clear();
+    body = "";
+    std::ifstream input;
+
+    /*if (conf.error_pages.count(x))
+    {
+        state = FILE;
+        if ( conf.error_pages[x] == exists)
+            use it;
+
+    }
+    else
+        use normal one;*/
+    error_pages_map errors;
+    body += errors[x];
+    headers["Content-Length"] = int_to_string(body.size());
+    headers["Content-Type"] = content_type["html"];
+    res_header += "HTTP/1.1 200 OK\n";
+    for (std::map<std::string,std::string>::iterator it = headers.begin(); it != headers.end(); it++)
+        res_header +=  (*it).first + ":" + (*it).second + "\n";
+    type = SEND;
+}                                          
 
 std::string int_to_string(int a)
 {

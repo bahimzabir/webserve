@@ -1,5 +1,5 @@
 #include "http/config_matcher.hpp"
-
+#include "servers.hpp"
 int main()
 {
     config_match cf_match;
@@ -30,10 +30,11 @@ int main()
         // std::cout << cf_match.client_max_body_size << "\n";
         // std::cout << cf_match.err_pages_struct[0].error_file << "\n";
         // std::cout << cf_match.return_value << "\n";
+        servers raa9(config_info);
+        raa9.deploy();
     } catch (std::exception& obj) {
         std::cout <<"exception: " <<obj.what();
     }
 
-    //servers raa9(config_info);
-    //raa9.deploy();
+
 }

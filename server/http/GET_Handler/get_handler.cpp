@@ -1,13 +1,14 @@
 #include "../http_response.hpp"
 
+
+
 void http_response::GET_open_input()
 {
-    std::string file_path = "/Users/hait-moh/Desktop/webserv/webserve" + request.get_path();
+    std::string file_path = conf.root;
     std::cout << file_path << std::endl;
     file.open(file_path);
-    std::cout << file.good() << std::endl;
-    if (!file.good())
-        throw 200;
+    if (!file)
+        throw 403;
     state = RESPONSE_BODY;
 }
 void http_response::GET_body()
@@ -36,14 +37,32 @@ void http_response::GET_body()
     else if (!file.good())
     {
         std::cout << "fail" << std::endl;
-        throw 200;
+        throw 666;
     }
 }
 
 
-void http_response::GET_open_directory()
+void http_response::GET_list_directory()
 {
-    
+    DIR *directory;
+    struct dirent *d;
+    directory = opendir(conf.root.c_str());
+    if (!directory)
+        throw 403;
+    d = readdir(directory);
+    while (d)
+    {
+        std::string path = d->d_name;
+        body += "<a href='" + path + ">" + path + "</a><br /><br />\n";
+        d = readdir(directory);
+    }
+    headers["Content-Length"] = int_to_string(body.size());
+    headers["Content-Type"] = content_type["html"];
+    res_header += "HTTP/1.1 200 OK\n";
+    for (std::map<std::string,std::string>::iterator it = headers.begin(); it != headers.end(); it++)
+        res_header +=  (*it).first + ":" + (*it).second + "\n";
+    res_header += "\n";
+    type = SEND;
 }
 
 void http_response::GET_handler()
@@ -51,8 +70,8 @@ void http_response::GET_handler()
     std::cout << "GET_H" << std::endl;
     if (state == FILE)
         GET_open_input();
-    else if (state == DIRECTORY)
-        GET_open_directory();
+    else if (state == LIST_DIRECTORY)
+        GET_list_directory();
     else if (state == RESPONSE_BODY)
         GET_body();
 }

@@ -1,7 +1,9 @@
 #pragma once
 
-#include "../servers.hpp"
+#include <map>
 #include <utility>
+#include <string>
+
 
 
 class error_pages_map : public std::map<int, std::string>
