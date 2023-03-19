@@ -17,9 +17,9 @@ struct t_data
     int type;
     http_request request;
     http_response *response;
-    config *conf;
+    std::string host;
+    std::string port;
 };
-
 
 class servers
 {
@@ -29,7 +29,7 @@ class servers
     
     //std::vector<servers> configs;
     public:
-        servers(std::vector<config> &config_info);
+        servers();
         void client_req_handler(int &index);
         void client_res_handler(int &index);
         void listener_handler(int &index);

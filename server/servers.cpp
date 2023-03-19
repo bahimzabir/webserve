@@ -1,6 +1,6 @@
 #include "servers.hpp"
 
-servers::servers(std::vector<config> &config_info)
+servers::servers()
 {
     pollfd p;
     t_data d;
@@ -12,7 +12,6 @@ servers::servers(std::vector<config> &config_info)
             try
             {   
                 sockets.push_back(_socket(config_info[i].host,config_info[i].ports[i]));
-                d.conf = &(config_info[i]);
                 data.push_back(d);
                 p.fd = sockets[i].get_socket_fd();
                 

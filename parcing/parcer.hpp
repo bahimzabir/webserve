@@ -15,6 +15,7 @@
 
 #include "libs.hpp"
 
+
 #define OUT_SCOOP 0
 #define SERVER_SCOOP 1
 #define ROUTE_SCOOP 2
@@ -59,7 +60,8 @@ struct config {
 	// to be defined
 	std::map<int, std::string>		error_pages;
 };
-
+extern std::vector<config> config_info;
+extern config g_def;
 class Exception : public std::exception {
 
 	private:	

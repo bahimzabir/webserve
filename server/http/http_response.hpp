@@ -61,7 +61,7 @@ class http_response
 
 
     public:
-        http_response(http_request &req,struct pollfd *fd,config *con);
+        http_response(http_request &req,struct pollfd *fd);
         void generate_response();
 
 };

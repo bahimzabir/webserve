@@ -17,7 +17,7 @@ struct config_match
 };
 
 //Note: you have to free the config_match returned after using it
-config_match& get_config(std::string host, std::string port, std::string rout, std::string server_name, std::vector<config>& config_info, config& def);
+config_match& get_config(std::string host, std::string port, std::string rout, std::string server_name);
 
 
 //(ip,port,directory,domain-name)

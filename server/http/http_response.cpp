@@ -3,7 +3,7 @@
 
 
 
-http_response::http_response(http_request &req,struct pollfd *fd,config *con) : request(req)
+http_response::http_response(http_request &req,struct pollfd *fd) : request(req)
 {
     content_type["html"] =  "text/html";
     content_type["htm"] =  "text/html";
