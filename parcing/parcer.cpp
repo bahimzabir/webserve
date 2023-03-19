@@ -19,7 +19,7 @@ bool	is_special(char c) {
 }
 bool is_digit(std::string str)
 {
-	for (int i = 0; i < str.length(); i++)
+	for (unsigned int i = 0; i < str.length(); i++)
 	{
 		if (str[i] < '0' || str[i] > '9')
 			return false;
@@ -43,18 +43,11 @@ std::string line_num(std::vector<std::string> cmd, int i) {
 void scoopCheck(std::vector<std::string> cmd, std::string configFilePath) {
 	int s = cmd.size();
 	int scoop = 0;
-	int j;
 	for (int i = 0; i < s; i++) {
 		if (cmd[i] == "{")
-		{
 			scoop ++;
-			j++;
-		}
 		else if(cmd[i] == "}")
-		{
 			scoop --;
-			j++;
-		}
 		if (scoop < 0 || scoop > 2)
 			throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": '" + cmd[i] + "' unexpected here\n");
 	}
@@ -99,7 +92,7 @@ std::vector<std::string>	readFile(std::string file_path) {
 	while (std::getline(file, line))
 		file_content += line + "\n";
 	file.close();
-	for(int i = 0; i < file_content.length(); i++) {
+	for(unsigned int i = 0; i < file_content.length(); i++) {
 		
 		while (!is_special(file_content[i])) {
 			tmp += file_content[i];
@@ -116,7 +109,7 @@ std::vector<std::string>	readFile(std::string file_path) {
 	return cmd;
 }
 
-int	getStringValue(std::string& configFilePath, std::string& toReplace, std::vector<std::string>& cmd, std::string toGet, int servers_index, int i) {
+int	getStringValue(std::string& configFilePath, std::string& toReplace, std::vector<std::string>& cmd, std::string toGet, int i) {
 	i++;
 	if (cmd[i] == ";" || cmd[i] == "\n")
 		throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": no Host defined for the server\n");
@@ -129,7 +122,7 @@ int	getStringValue(std::string& configFilePath, std::string& toReplace, std::vec
 	return i;
 }
 
-int	getDigitValue(std::string& configFilePath, long *toReplace, std::vector<std::string>& cmd, std::string toGet, int servers_index, int i) {
+int	getDigitValue(std::string& configFilePath, long *toReplace, std::vector<std::string>& cmd, std::string toGet, int i) {
 	i++;
 	if (cmd[i] == ";" || cmd[i] == "\n")
 		throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": no Host defined for the server\n");
@@ -160,7 +153,7 @@ std::vector<config> getServersInfos(std::string configFilePath) {
 
 	cmd = readFile(configFilePath);
 	scoopCheck(cmd, configFilePath);
-	for (int i = 0;  i < cmd.size(); i++) {
+	for (unsigned int i = 0;  i < cmd.size(); i++) {
 		err_pages_struct_index = -1;
 		routes_index = -1;
 		while(i < cmd.size() && cmd[i] == "\n")
@@ -207,9 +200,9 @@ std::vector<config> getServersInfos(std::string configFilePath) {
 						i++;
 					}
 				} else if (cmd[i] == "host") {
-					i = getStringValue(configFilePath, servers[servers_index].host, cmd, "host", servers_index, i);
+					i = getStringValue(configFilePath, servers[servers_index].host, cmd, "host", i);
 				} else if (cmd[i] == "max_client_body_size") {
-					i = getDigitValue(configFilePath, &servers[servers_index].client_max_body_size, cmd, "max_client_body_size", servers_index, i);
+					i = getDigitValue(configFilePath, &servers[servers_index].client_max_body_size, cmd, "max_client_body_size", i);
 				} else if (cmd[i] == "error_page") {
 					i++;
 					servers[servers_index].err_pages_struct.push_back(errorPage());
@@ -267,13 +260,13 @@ std::vector<config> getServersInfos(std::string configFilePath) {
 							i++;
 							}
 						}else if (cmd[i] == "autoindex") {
-							i = getDigitValue(configFilePath, &servers[servers_index].routes[routes_index].autoindex, cmd, "autoindex", servers_index, i);
+							i = getDigitValue(configFilePath, &servers[servers_index].routes[routes_index].autoindex, cmd, "autoindex", i);
 						}else if (cmd[i] == "root") {
-							i = getStringValue(configFilePath, servers[servers_index].routes[routes_index].root, cmd, "root", servers_index, i);
+							i = getStringValue(configFilePath, servers[servers_index].routes[routes_index].root, cmd, "root", i);
 						}else if (cmd[i] == "upload_pass") {
-							i = getStringValue(configFilePath, servers[servers_index].routes[routes_index].upload_pass, cmd, "upload_pass", servers_index, i);
+							i = getStringValue(configFilePath, servers[servers_index].routes[routes_index].upload_pass, cmd, "upload_pass", i);
 						} else if (cmd[i] == "return") {
-							i = getStringValue(configFilePath, servers[servers_index].routes[routes_index].return_value, cmd, "return", servers_index, i);
+							i = getStringValue(configFilePath, servers[servers_index].routes[routes_index].return_value, cmd, "return", i);
 						} else if (cmd[i] == "cgi_pass") {
 							i++;
 							servers[servers_index].routes[routes_index].cgi_pass.push_back(cgi());

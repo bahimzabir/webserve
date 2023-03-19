@@ -19,8 +19,13 @@
 #define SERVER_SCOOP 1
 #define ROUTE_SCOOP 2
 #define PRE_SERVER_SCOOP 3
-#define PRE_ROUTE_SCOOP 4
-#define PRE_ROUTE_NAME 5
+#define	DEF_HOST "127.0.0.1"
+#define	DEF_PORT "8000"
+#define	DEF_MAX_BODY_SIZE INT64_MAX
+#define	DEF_ALLOW_METHODS "ALL"
+#define	DEF_INDEX "index.html"
+#define	DEF_AUTO_INDEX 0
+#define DEF_ROOT "/"
 
 struct errorPage : public std::map<int, std::string>{
 	std::string	error_num;

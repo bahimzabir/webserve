@@ -1,6 +1,6 @@
 #include "config_matcher.hpp"
 
-config_match& config_struct_fill(config& cf, route& rout, long cmbs, std::vector<errorPage>& error_p) {
+config_match& config_struct_fill(route& rout, long cmbs, std::vector<errorPage>& error_p) {
 
 	config_match *conf = new config_match();
 
@@ -52,16 +52,16 @@ config_match& get_config(std::string host, std::string port, std::string rout, s
 	{
 		std::cerr << "here\n";
 		// std::cerr << match_lvl3.size() << "\n";
-		return (config_struct_fill(*match_lvl3, rt, match_lvl3->client_max_body_size, match_lvl3->err_pages_struct));
+		return (config_struct_fill(rt, match_lvl3->client_max_body_size, match_lvl3->err_pages_struct));
 	}else if(match_lvl2)
 	{
-		return (config_struct_fill(*match_lvl2, *def.routes.begin(), match_lvl2->client_max_body_size, match_lvl2->err_pages_struct));
+		return (config_struct_fill(*def.routes.begin(), match_lvl2->client_max_body_size, match_lvl2->err_pages_struct));
 	}else if (match_lvl1)
 	{
-		return (config_struct_fill(*match_lvl1, *def.routes.begin(), match_lvl1->client_max_body_size, match_lvl1->err_pages_struct));
+		return (config_struct_fill(*def.routes.begin(), match_lvl1->client_max_body_size, match_lvl1->err_pages_struct));
 	}else
 	{
-		return (config_struct_fill(def, *def.routes.begin(), def.client_max_body_size, def.err_pages_struct));
+		return (config_struct_fill(*def.routes.begin(), def.client_max_body_size, def.err_pages_struct));
 	}
 	// std::cerr << "here\n";
 }
