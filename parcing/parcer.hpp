@@ -28,8 +28,8 @@
 #define	DEF_AUTO_INDEX 0
 #define DEF_ROOT "/"
 
-struct errorPage : public std::map<int, std::string>{
-	std::string	error_num;
+struct errorPage{
+	int			error_num;
 	std::string	error_file;
 };
 

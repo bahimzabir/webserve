@@ -2,14 +2,19 @@
 #include "http/error_pages_map.hpp"
 
 void	init_default_params(config& conf) {
-	error_pages_map def_error_p;
-
 	if (conf.ports.empty())
 		conf.ports.push_back(DEF_PORT);
 	conf.host.empty() ? DEF_HOST : conf.host;
 	conf.client_max_body_size = !conf.client_max_body_size ? DEF_MAX_BODY_SIZE : conf.client_max_body_size;
 	if (conf.routes.empty()) 
 		conf.routes.push_back(route());
+	if (!conf.err_pages_struct.empty())
+	{
+		for (std::vector<errorPage>::iterator it = conf.err_pages_struct.begin(); it != conf.err_pages_struct.end(); it++) {
+			errorPage& err = *it;
+			conf.error_pages.insert(std::make_pair<int, std::string>(err.error_num, err.error_file));
+		}
+	}
 	for (std::vector<route>::iterator it = conf.routes.begin(); it != conf.routes.end(); it++) {
 			route &rt = *it;
 			if (rt.methods.empty())
@@ -24,8 +29,9 @@ void	init_default_params(config& conf) {
 
 void server_init(std::vector<config>& configs) {
 	
+	configs = getServersInfos("parcing/config.conf");
 	for (std::vector<config>::iterator it = configs.begin(); it != configs.end(); it++) {
 		config& cf = *it;
-
+		init_default_params(cf);
 	}
 }

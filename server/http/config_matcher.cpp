@@ -1,6 +1,6 @@
 #include "config_matcher.hpp"
 
-config_match& config_struct_fill(route& rout, long cmbs, std::vector<errorPage>& error_p) {
+config_match& config_struct_fill(route& rout, long cmbs, std::map<int, std::string>& error_p) {
 
 	config_match *conf = new config_match();
 
@@ -11,7 +11,7 @@ config_match& config_struct_fill(route& rout, long cmbs, std::vector<errorPage>&
 	conf->autoindex = rout.autoindex;
 	conf->upload_pass = rout.upload_pass;
 	conf->cgi_pass = rout.cgi_pass;
-	conf->err_pages_struct = error_p;
+	conf->err_pages = error_p;
 	conf->return_value = rout.return_value;
 	conf->cgi_pass = rout.cgi_pass;
 	return *conf;
@@ -52,16 +52,16 @@ config_match& get_config(std::string host, std::string port, std::string rout, s
 	{
 		std::cerr << "here\n";
 		// std::cerr << match_lvl3.size() << "\n";
-		return (config_struct_fill(rt, match_lvl3->client_max_body_size, match_lvl3->err_pages_struct));
+		return (config_struct_fill(rt, match_lvl3->client_max_body_size, match_lvl3->error_pages));
 	}else if(match_lvl2)
 	{
-		return (config_struct_fill(*g_def.routes.begin(), match_lvl2->client_max_body_size, match_lvl2->err_pages_struct));
+		return (config_struct_fill(*g_def.routes.begin(), match_lvl2->client_max_body_size, match_lvl2->error_pages));
 	}else if (match_lvl1)
 	{
-		return (config_struct_fill(*g_def.routes.begin(), match_lvl1->client_max_body_size, match_lvl1->err_pages_struct));
+		return (config_struct_fill(*g_def.routes.begin(), match_lvl1->client_max_body_size, match_lvl1->error_pages));
 	}else
 	{
-		return (config_struct_fill(*g_def.routes.begin(), g_def.client_max_body_size, g_def.err_pages_struct));
+		return (config_struct_fill(*g_def.routes.begin(), g_def.client_max_body_size, g_def.error_pages));
 	}
 	// std::cerr << "here\n";
 }

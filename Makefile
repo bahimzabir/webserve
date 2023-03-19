@@ -1,5 +1,5 @@
 SRC= ./server/http/*/*.cpp ./server/http/*.cpp ./server/*.cpp ./parcing/*.cpp
-SRC2= ./server/http/config_matcher.cpp ./parcing/parcer.cpp ./server/main.cpp
+SRC2= ./server/http/config_matcher.cpp ./parcing/parcer.cpp ./server/main.cpp ./server/server_init.cpp
 CPPFLAGS = -std=c++98 -fsanitize=address -g
 NAME = webserve
 

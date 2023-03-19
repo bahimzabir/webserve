@@ -12,7 +12,7 @@ struct config_match
     std::string					upload_pass;
     std::vector<cgi>			cgi_pass;
     long				    	client_max_body_size;
-	std::vector<errorPage>		err_pages_struct;
+	std::map<int, std::string>	err_pages;
     std::string                 return_value;
 };
 

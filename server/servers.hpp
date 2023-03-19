@@ -36,3 +36,5 @@ class servers
         void file_handler(int index);
         int deploy();
 };
+
+void server_init(std::vector<config>& configs);

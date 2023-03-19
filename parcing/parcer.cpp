@@ -212,7 +212,9 @@ std::vector<config> getServersInfos(std::string configFilePath) {
 					err_pages_struct_index++;
 					if (cmd[i] == ";" || cmd[i] == "\n" || !is_digit(cmd[i]))
 						throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": "+ cmd[i] +" 'error code' is invalid for the error_page\n");
-					servers[servers_index].err_pages_struct[err_pages_struct_index].error_num = cmd[i++];
+					servers[servers_index].err_pages_struct[err_pages_struct_index].error_num = std::atoi(cmd[i++].c_str());
+					if (errno == ERANGE)
+						throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": invalid error code\n");
 					if (cmd[i] == ";" || cmd[i] == "\n" )
 						throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": 'error page' is required\n");
 					servers[servers_index].err_pages_struct[err_pages_struct_index].error_file = cmd[i++];
