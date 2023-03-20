@@ -102,7 +102,7 @@ http_response::http_response(http_request &req,struct pollfd *fd,std::string &ho
     content_type["avi"] =  "video/x-msvideo";
 
     conf = get_config(host,port,request.get_path(),req.get_header("HOST"));
-    std::cerr << host << " " + port + " " + request.get_path() + " " + req.get_header("HOST") + "\n";
+    std::cerr <<"["<< host << "] [" + port + "] [" + request.get_path() + "] [" + req.get_header("HOST") + "]\n";
     std::cout << "------------------ " << conf.root <<  "----" << std::endl;
     std::map<std::string,int> met_map;
     met_map["GET"] = GET;

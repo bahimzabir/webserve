@@ -75,5 +75,6 @@ class Exception : public std::exception {
 
 std::vector<config> getServersInfos(std::string configFilePath);
 void	add_default_params(config& conf, config& deflt);
+void	strTrim(std::string& str);
 
 #endif

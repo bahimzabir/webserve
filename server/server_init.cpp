@@ -3,6 +3,18 @@
 
 std::vector<config> config_info;
 
+void	strTrim(std::string& str) {
+    int i = 0;
+    int j = str.size() - 1;
+    if (i <= j && (std::isspace(str[i]) || str[i] == '/')) {
+        i++;
+    }
+    if (j > 0 && (std::isspace(str[j]) || str[j] == '/')) {
+       j--;
+    }
+    str = str.substr(i, j);
+}
+
 void	init_default_params(config& conf) {
 	if (conf.ports.empty())
 		conf.ports.push_back(DEF_PORT);
@@ -23,7 +35,12 @@ void	init_default_params(config& conf) {
 				rt.methods.push_back(DEF_ALLOW_METHODS);
 			if(rt.index.empty())
 				rt.index.push_back(DEF_INDEX);
-			rt.route_name = rt.root.empty() ? (rt.route_name.empty() ? DEF_ROOT : rt.route_name) : rt.root;
+			rt.route_name = rt.route_name.empty() ? DEF_ROOT : rt.route_name;
+			rt.root = rt.root.empty() ? DEF_ROOT : rt.root;
+			if (rt.route_name != "/")
+				strTrim(rt.route_name);
+			if (rt.root != "/")
+				strTrim(rt.root);
 	}
 }
 
