@@ -28,6 +28,7 @@
 #define NOT_IMPLEMENTED 501
 #define NOT_ALLOWED 405
 
+
 class http_response
 {
     http_request &request;
@@ -61,7 +62,7 @@ class http_response
 
 
     public:
-        http_response(http_request &req,struct pollfd *fd);
+        http_response(http_request &req,struct pollfd *fd,std::string &host,std::string &port);
         void generate_response();
 
 };

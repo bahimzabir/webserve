@@ -12,9 +12,10 @@ servers::servers()
             try
             {   
                 sockets.push_back(_socket(config_info[i].host,config_info[i].ports[i]));
+                d.host = config_info[i].host;
+                d.port = config_info[i].ports[i];
                 data.push_back(d);
                 p.fd = sockets[i].get_socket_fd();
-                
                 p.events = POLLIN;
                 p.revents = 0;
                 fd_poll.push_back(p);
@@ -42,7 +43,22 @@ int servers::deploy()
                 break;
             if (fd_poll[i].revents & POLLBOTH)
             {
-                (this->*handlers[data[i].type])(i);//CALL THE function handler based on type
+                try
+                {
+                    (this->*handlers[data[i].type])(i);//CALL THE function handler based on type
+                }
+                catch (int status)
+                {
+                    if (status == 666)
+                    {
+                        close(fd_poll[i].fd);
+                        fd_poll.erase(fd_poll.begin() + i);
+                        delete data[i].response;
+                        data.erase(data.begin() + i);
+                        i--;
+                    }
+                }
+                fd_poll[i].revents = 0;
                 num_of_revents--;
             }
         }

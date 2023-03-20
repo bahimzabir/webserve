@@ -21,16 +21,17 @@ void servers::client_req_handler(int &index)
     int ret;
     ret = recv(fd_poll[index].fd,buffer,1024,0);
     if (ret == -1)
-        throw "client error";
+        throw 666;
     buffer[ret] = 0;
-    std::cout << "blan\n" << std::endl;
+    std::cout << "blan1\n" << std::endl;
     data[index].request.parse_remaining(buffer,ret,count_nl(buffer));
-    std::cout << "blan\n" << std::endl;
+    std::cout << "blan2\n" << std::endl;
     if (data[index].request.get_state() == REQUEST_BODY)
     {
+        std::cout << "salat\n" << std::endl;
         fd_poll[index].events = POLLOUT;
         data[index].type = RESPONSE;
-        data[index].response = new http_response(data[index].request,&(fd_poll[index]));
+        data[index].response = new http_response(data[index].request,&(fd_poll[index]),data[index].host,data[index].port);
         return;
     }
 }
@@ -40,23 +41,7 @@ void servers::client_res_handler(int &index)
     if (!(fd_poll[index].revents & POLLOUT))
         return ;
     std::cout << "RESPONSE" << std::endl;
-    try
-    {
-        std::cout << "HNA   " << std::endl;
-        data[index].response->generate_response();
-    }
-    catch(int status)
-    {
-        if (status == 200)
-        {
-            close(fd_poll[index].fd);
-            fd_poll.erase(fd_poll.begin() + index);
-            delete data[index].response;
-            data.erase(data.begin() + index);
-            index--;
-        }
-    }
-    
+    data[index].response->generate_response();
     
 }
 void servers::listener_handler(int &index)
@@ -76,6 +61,8 @@ void servers::listener_handler(int &index)
     {
         p.events = POLLIN;
         p.revents = 0;
+        d.host = data[index].host;
+        d.port = data[index].port;
         fd_poll.push_back(p);
         data.push_back(d);
     }

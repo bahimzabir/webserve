@@ -13,8 +13,13 @@ void http_request::push_header(std::string &line)
 
 
     getline(str_stream,field,':');
+    for (int i = 0; i < field.size();i++)
+        field[i] = toupper(field[i]);
     pair.first = field;
+    
     getline(str_stream,field,':');
+    for (int i = 0; i < field.size();i++)
+        field[i] = toupper(field[i]);
     pair.second = field;
     headers.push_back(pair);
 }
@@ -37,6 +42,7 @@ void http_request::http_header_handler()
     getline(str_stream,field,' ');
     http_header[2] = field;
     state = REQUEST_HEADERS;
+    remaining_nl--;
 }
 
 void http_request::headers_handler()
@@ -62,14 +68,28 @@ int http_request::get_state()
     return state;
 }
 
+std::string http_request::get_header(const std::string &header)
+{
+    std::string empty;
+    for (int i = 0;i < headers.size();i++)
+    {
+        if (headers[i].first == header)
+            return (headers[i].second);
+    }
+    return empty;
+}
 
 void http_request::parse_remaining(char *buffer,int len, int n_new_line)
 {
+    void (http_request::*handlers[2])() = {&http_request::http_header_handler,&http_request::headers_handler};
+
+
+
     remaining_nl += n_new_line;
     remaining.write(buffer,len);
-    void (http_request::*handlers[2])() = {&http_request::http_header_handler,&http_request::headers_handler};
     std::cout << "dkhlat" << state << std::endl;
-    (this->*handlers[state])();
+    while (remaining_nl && state != REQUEST_BODY)
+        (this->*handlers[state])();
 }
 
 
