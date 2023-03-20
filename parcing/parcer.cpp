@@ -13,8 +13,6 @@
 #include "parcer.hpp"
 
 
-std::vector<config> config_info;
-config g_def;
 bool	is_special(char c) {
 	if (c == '{' || c == ';' || c == '}' || c == ' ' || c == '\n')
 		return true;

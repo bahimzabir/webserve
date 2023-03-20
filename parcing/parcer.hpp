@@ -61,7 +61,7 @@ struct config {
 	std::map<int, std::string>		error_pages;
 };
 extern std::vector<config> config_info;
-extern config g_def;
+
 class Exception : public std::exception {
 
 	private:	

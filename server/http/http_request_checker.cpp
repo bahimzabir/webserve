@@ -18,7 +18,7 @@ the mandatory requirements for each HTTP request:
 
 ALL requests:
 	The request must contain a valid resource path in the form of an absolute or relative URL.
-	The request must contain a valid HTTP version, which must be either HTTP/1.0 or HTTP/1.1.
+	The request must contain a valid HTTP version, which must be HTTP/1.1.
 GET & DELETE requests:
 	The method must be GET || DELETE.
 POST request:
@@ -28,4 +28,19 @@ POST request:
 	The message body must contain the data being submitted to the server in the correct format specified by the Content-Type header.
 */
 
+bool http_request::isValidHttpRequest() {
+	
+	bool hasResourcePath = false;
+    bool hasHttpVersion = false;
+    bool hasValidMethod = false;
+    bool hasContentLength = false;
+    bool hasContentType = false;
+    bool hasMessageBody = false;
 
+	if ((http_header[0] == "GET" || http_header[0] == "DELETE") && http_header[2] != "HTTP/1.1")
+		if (!http_header[2].empty() && http_header.)
+	int size = headers.size();
+	for (int i = 0; i < size; i++) {
+		
+	}
+}

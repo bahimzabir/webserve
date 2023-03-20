@@ -31,5 +31,6 @@ class http_request
         const std::string &get_method();
         const std::string &get_version();
         const std::string &get_path();
+        bool isValidHttpRequest();
         int get_state();
 };

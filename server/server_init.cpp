@@ -1,6 +1,8 @@
 #include "servers.hpp"
 #include "http/error_pages_map.hpp"
 
+std::vector<config> config_info;
+
 void	init_default_params(config& conf) {
 	if (conf.ports.empty())
 		conf.ports.push_back(DEF_PORT);
@@ -26,7 +28,6 @@ void	init_default_params(config& conf) {
 }
 
 void server_init() {
-	
 	config_info = getServersInfos("parcing/config.conf");
 	config_info.push_back(config());
 	//std::cerr << "debug = " << configs.back().routes.size() << "\n";
