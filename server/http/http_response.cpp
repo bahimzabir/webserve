@@ -3,7 +3,7 @@
 
 
 
-http_response::http_response(http_request &req,struct pollfd *fd) : request(req)
+http_response::http_response(http_request &req,struct pollfd *fd,std::string &host,std::string &port) : request(req)
 {
     content_type["html"] =  "text/html";
     content_type["htm"] =  "text/html";
@@ -100,20 +100,30 @@ http_response::http_response(http_request &req,struct pollfd *fd) : request(req)
     content_type["asf"] =  "video/x-ms-asf";
     content_type["wmv"] =  "video/x-ms-wmv";
     content_type["avi"] =  "video/x-msvideo";
+
+    conf = get_config(host,port,request.get_path(),req.get_header("HOST"));
+    std::cout << "------------------ " << conf.root <<  "----" << std::endl;
     std::map<std::string,int> met_map;
     met_map["GET"] = GET;
     met_map["POST"] = POST;
     met_map["DELETE"] = DELETE;
-    
-    if (met_map.find(request.get_method()) == met_map.end())
-        throw NOT_IMPLEMENTED;
-    if (std::find(conf.methods.begin(),conf.methods.end(),request.get_method()) == conf.methods.end())
-        throw NOT_ALLOWED;
-    type = met_map[request.get_method()];
-    if (state == GET || state == DELETE)
-        client->events = POLLIN;
-    check_state();
     client = fd;
+    try
+    {
+        if (met_map.find(request.get_method()) == met_map.end())
+            throw NOT_IMPLEMENTED;
+        if (conf.methods[0] != "ALL" && std::find(conf.methods.begin(),conf.methods.end(),request.get_method()) == conf.methods.end())
+            throw NOT_ALLOWED;
+        type = met_map[request.get_method()];
+        if (state == GET || state == DELETE)
+            client->events = POLLOUT;
+        check_state();
+        std::cout << "khrjat" << std::endl;
+    }
+    catch(int x)
+    {
+        ERROR_handler(x);
+    }
 }
 
 void http_response::check_state()
@@ -152,7 +162,7 @@ void http_response::check_state()
 
 void http_response::generate_response()
 {
-    void (http_response::*handlers[4])() = {&http_response::GET_handler,&http_response::POST_handler,&http_response::DELETE_handler,&http_response::SEND_handler,};
+    void (http_response::*handlers[4])() = {&http_response::GET_handler,&http_response::POST_handler,&http_response::DELETE_handler,&http_response::SEND_handler};
     try
     {
         (this->*handlers[type])();
@@ -172,40 +182,45 @@ void http_response::SEND_handler()
     else
         ret = send(client->fd,body.c_str(),body.size(),0);
     if (ret == -1)
-    {
-        throw 666;
-    }
+        throw 200;
     if (res_header != "")
         res_header.erase(0,ret);
     else
         body.erase(0,ret);
     if (body == "")
-        throw 666;
+    {
+        std::cout << "rah salaw" << std::endl;
+        throw 200;
+    }
 }
 
 void http_response::ERROR_handler(int x)
 {
     res_header = "";
-    headers.clear();
     body = "";
-    std::ifstream input;
-
-    /*if (conf.error_pages.count(x))
+    headers.clear();
+    if (x == 666)
+        throw x;
+    if (conf.err_pages[x] != "")
     {
-        state = FILE;
-        if ( conf.error_pages[x] == exists)
-            use it;
-
+        std::ifstream file(conf.err_pages[x]);
+        if (file.good())
+        {
+            conf.root = conf.err_pages[x];
+            type = GET;
+            state = FILE;
+            return;
+        }
     }
-    else
-        use normal one;*/
     error_pages_map errors;
-    body += errors[x];
+    body += errors.get_error(x);
     headers["Content-Length"] = int_to_string(body.size());
     headers["Content-Type"] = content_type["html"];
-    res_header += "HTTP/1.1 200 OK\n";
+    res_header = "HTTP/1.1 200 OK\n";
     for (std::map<std::string,std::string>::iterator it = headers.begin(); it != headers.end(); it++)
         res_header +=  (*it).first + ":" + (*it).second + "\n";
+    res_header += '\n';
+    std::cout << body.size() << " " << res_header.size() << std::endl;
     type = SEND;
 }                                          
 

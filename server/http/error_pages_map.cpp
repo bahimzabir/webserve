@@ -7,6 +7,8 @@ error_pages_map::error_pages_map(void) {
    error_pages.insert(std::make_pair<int, std::string>(403, "<html><body><h1>Error 403: Forbidden</h1></body></html>"));
    error_pages.insert(std::make_pair<int, std::string>(404, "<html><body><h1>Error 404: Not Found</h1></body></html>"));
    error_pages.insert(std::make_pair<int, std::string>(500, "<html><body><h1>Error 500: Internal Server Error</h1></body></html>"));
+   error_pages.insert(std::make_pair<int, std::string>(501, "<html><body><h1>Error 501: Not Implemented</h1></body></html>"));
+   error_pages.insert(std::make_pair<int, std::string>(405, "<html><body><h1>Error 405: Method Not Allowed</h1></body></html>"));
    error_pages.insert(std::make_pair<int, std::string>(503, "<html><body><h1>Error 503: Service Unavailable</h1></body></html>"));
 }
 

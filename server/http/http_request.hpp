@@ -32,4 +32,5 @@ class http_request
         const std::string &get_version();
         const std::string &get_path();
         int get_state();
+        std::string get_header(const std::string &header);
 };
