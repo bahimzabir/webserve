@@ -29,6 +29,6 @@ int main()
     std::cout << cf_match.upload_pass << "\n";
     std::cout << cf_match.client_max_body_size << "\n";
     std::cout << cf_match.return_value << "\n";
-    // servers raa9;
-    // raa9.deploy();
+    servers raa9;
+    raa9.deploy();
 }

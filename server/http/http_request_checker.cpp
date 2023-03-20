@@ -28,19 +28,19 @@ POST request:
 	The message body must contain the data being submitted to the server in the correct format specified by the Content-Type header.
 */
 
-bool http_request::isValidHttpRequest() {
+// bool http_request::isValidHttpRequest() {
 	
-	bool hasResourcePath = false;
-    bool hasHttpVersion = false;
-    bool hasValidMethod = false;
-    bool hasContentLength = false;
-    bool hasContentType = false;
-    bool hasMessageBody = false;
+// 	bool hasResourcePath = false;
+//     bool hasHttpVersion = false;
+//     bool hasValidMethod = false;
+//     bool hasContentLength = false;
+//     bool hasContentType = false;
+//     bool hasMessageBody = false;
 
-	if ((http_header[0] == "GET" || http_header[0] == "DELETE") && http_header[2] != "HTTP/1.1")
-		if (!http_header[2].empty() && http_header.)
-	int size = headers.size();
-	for (int i = 0; i < size; i++) {
+// 	if ((http_header[0] == "GET" || http_header[0] == "DELETE") && http_header[2] != "HTTP/1.1")
+// 		if (!http_header[2].empty() && http_header.)
+// 	int size = headers.size();
+// 	for (int i = 0; i < size; i++) {
 		
-	}
-}
+// 	}
+// }

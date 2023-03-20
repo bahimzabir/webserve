@@ -5,20 +5,23 @@ servers::servers()
     pollfd p;
     t_data d;
     d.type = LISTENER;
+    int index = 0;
+
     for (int i = 0;i < config_info.size();i++)
     {
         for (int port_index = 0; port_index < config_info[i].ports.size();port_index++)
         {
             try
             {   
-                sockets.push_back(_socket(config_info[i].host,config_info[i].ports[i]));
+                sockets.push_back(_socket(config_info[i].host,config_info[i].ports[port_index]));
                 d.host = config_info[i].host;
-                d.port = config_info[i].ports[i];
+                d.port = config_info[i].ports[port_index];
                 data.push_back(d);
-                p.fd = sockets[i].get_socket_fd();
+                p.fd = sockets[index].get_socket_fd();
                 p.events = POLLIN;
                 p.revents = 0;
                 fd_poll.push_back(p);
+                index++;
             }
             catch(int x)
             {
