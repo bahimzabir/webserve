@@ -36,6 +36,7 @@ class http_response
     std::map<std::string,std::string> headers;
     std::map<std::string,std::string> content_type;
     std::string res_header;
+    int content_remaining;
     std::string body;
     std::fstream file;
     config_match conf;

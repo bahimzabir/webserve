@@ -101,6 +101,7 @@ http_response::http_response(http_request &req,struct pollfd *fd,std::string &ho
     content_type["wmv"] =  "video/x-ms-wmv";
     content_type["avi"] =  "video/x-msvideo";
 
+    content_remaining = 0;
     conf = get_config(host,port,request.get_path(),req.get_header("HOST"));
     std::cerr <<"["<< host << "] [" + port + "] [" + request.get_path() + "] [" + req.get_header("HOST") + "]\n";
     std::cerr <<"THE '/' is added to the root end, do not add it again!\n";
@@ -120,7 +121,6 @@ http_response::http_response(http_request &req,struct pollfd *fd,std::string &ho
         if (state == GET || state == DELETE)
             client->events = POLLOUT;
         check_state();
-        std::cout << "khrjat" << std::endl;
     }
     catch(int x)
     {
@@ -139,11 +139,13 @@ void http_response::check_state()
         {
             for (int i = 0;i < conf.index.size();i++)
             {
-                std::ifstream f(conf.root + "/" + conf.index[i]);
+                std::ifstream f(conf.root + conf.index[i]);
+                std::cout << "------ ::::: " << conf.root + conf.index[i] << std::endl; 
                 if (f.good())
                 {
                     state = FILE;
-                    status[1] = "/" + conf.index[i];
+                    conf.root = conf.root + conf.index[i];
+                    type = GET;
                     f.close();
                     return;
                 }
@@ -179,20 +181,23 @@ void http_response::generate_response()
 void http_response::SEND_handler()
 {
     int ret;
+
     if (res_header != "")
         ret = send(client->fd,res_header.c_str(),res_header.size(),0);
     else
         ret = send(client->fd,body.c_str(),body.size(),0);
     if (ret == -1)
-        throw 200;
+        throw 666;
+    if (res_header == "")
+        content_remaining -= ret;
     if (res_header != "")
         res_header.erase(0,ret);
     else
         body.erase(0,ret);
-    if (body == "")
+    if (res_header == "" && !content_remaining)
     {
         std::cout << "rah salaw" << std::endl;
-        throw 200;
+        throw 666;
     }
 }
 
@@ -211,14 +216,16 @@ void http_response::ERROR_handler(int x)
             conf.root = conf.err_pages[x];
             type = GET;
             state = FILE;
+            file.close();
             return;
         }
     }
     error_pages_map errors;
     body += errors.get_error(x);
+    content_remaining = body.size();
     headers["Content-Length"] = int_to_string(body.size());
     headers["Content-Type"] = content_type["html"];
-    res_header = "HTTP/1.1 200 OK\n";
+    res_header = "HTTP/1.1 " + int_to_string(x) + " " + errors.get_message(x) + "\n";
     for (std::map<std::string,std::string>::iterator it = headers.begin(); it != headers.end(); it++)
         res_header +=  (*it).first + ":" + (*it).second + "\n";
     res_header += '\n';

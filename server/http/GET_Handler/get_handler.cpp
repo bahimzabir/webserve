@@ -1,6 +1,15 @@
 #include "../http_response.hpp"
 
-
+size_t getSize(std::string filename)
+{
+    struct stat results;
+    if (stat(filename.c_str(),&results) == 0)
+    {
+        std::cout << "size :           ::::::::::" << results.st_size << std::endl;
+        return results.st_size;
+    }
+    return 0;
+}
 
 void http_response::GET_open_input()
 {
@@ -9,34 +18,32 @@ void http_response::GET_open_input()
     file.open(file_path);
     if (!file)
         throw 403;
+    res_header += "HTTP/1.1 200 OK\n";
+    content_remaining = getSize(file_path);
+    headers["Content-Length"] = int_to_string(content_remaining);
+    std::string ext = (conf.root).substr(conf.root.find_last_of(".") + 1);
+    if (ext != conf.root && content_type.count(ext))
+        headers["Content-Type"] = content_type[ext];
+    else
+        headers["Content-Type"] = "text/plain";
+    for (std::map<std::string,std::string>::iterator it = headers.begin(); it != headers.end(); it++)
+        res_header +=  (*it).first + ":" + (*it).second + "\n";
+    res_header += "\n";
+    std::cout << "bdat asaaaat+++" << std::endl;
     state = RESPONSE_BODY;
 }
 void http_response::GET_body()
 {
-    char buffer[1001];
-    file.read(buffer,1000);
+    char buffer[10001];
+    file.read(buffer,10000);
     buffer[file.gcount()] = 0;
     body.append(buffer,file.gcount());
     std::cout << file.gcount() << std::endl;
-    if (file.eof())//ended file generation
+
+    SEND_handler();
+    if (!file.good() && !file.eof())
     {
-        type = SEND;
-        body += '\n';
-        headers["Content-Length"] = int_to_string(body.size());
-        std::string ext = (request.get_path()).substr(request.get_path().find_last_of(".") + 1);
-        if (ext != request.get_path() && content_type.count(ext))
-            headers["Content-Type"] = content_type[ext];
-        else
-            headers["Content-Type"] = "text/plain";
-        res_header += "HTTP/1.1 200 OK\n";
-        for (std::map<std::string,std::string>::iterator it = headers.begin(); it != headers.end(); it++)
-            res_header +=  (*it).first + ":" + (*it).second + "\n";
-        res_header += "\n";
-        std::cout << res_header << "---------" << std::endl;
-    }
-    else if (!file.good())
-    {
-        std::cout << "fail" << std::endl;
+        std::cout << body << std::endl;
         throw 666;
     }
 }
@@ -53,9 +60,10 @@ void http_response::GET_list_directory()
     while (d)
     {
         std::string path = d->d_name;
-        body += "<a href='" + path + ">" + path + "</a><br /><br />\n";
+        body += "<a href='" + path + "'>" + path + "</a><br /><br />\n";
         d = readdir(directory);
     }
+    content_remaining = body.size();
     headers["Content-Length"] = int_to_string(body.size());
     headers["Content-Type"] = content_type["html"];
     res_header += "HTTP/1.1 200 OK\n";
