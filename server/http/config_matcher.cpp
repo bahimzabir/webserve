@@ -19,6 +19,14 @@ config_match& config_struct_fill(route& rout, long cmbs, std::map<int, std::stri
 	return *conf;
 }
 
+/*
+
+TODO:
+	nginx chooses the shortest matched path
+	when  requesting /dir/dir1, and the cofing has a rout of name of /dir and root /server/path
+		i have to return /server/path/dir1
+*/
+
 config_match& get_config(std::string host, std::string port, std::string rout, std::string server_name) {
 
 	config* match_lvl1 = NULL;
