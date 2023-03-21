@@ -7,6 +7,8 @@ config_match& config_struct_fill(route& rout, long cmbs, std::map<int, std::stri
 	conf->methods = rout.methods;
 	conf->client_max_body_size = cmbs;
 	conf->root = rout.root;
+	if (rout.root.back() != '/')
+		conf->root += "/";
 	conf->index = rout.index;
 	conf->autoindex = rout.autoindex;
 	conf->upload_pass = rout.upload_pass;
@@ -25,9 +27,9 @@ config_match& get_config(std::string host, std::string port, std::string rout, s
 	config* match_lvl4 = &config_info.back();
 	std::vector<route>::iterator r_it;
 	route rt;
-	//rout = rout.
+
 	strTrim(server_name);
-	if (rout != "/")
+	//if (rout != "/")
 		strTrim(rout);
 	std::cerr << "[" + server_name + "]\n";
 	for (std::vector<config>::reverse_iterator it = config_info.rbegin(); it != config_info.rend(); it++) {
