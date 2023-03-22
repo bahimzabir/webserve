@@ -3,13 +3,13 @@
 
 std::vector<config> config_info;
 
-void	strTrim(std::string& str) {
+void	pathTrim(std::string& str) {
     int i = 0;
     int j = str.size() - 1;
-    if (i <= j && std::isspace(str[i])) {
+    while (i <= j && (std::isspace(str[i]) || str[i] == '/')) {
         i++;
     }
-    if (j > 0 && (std::isspace(str[j]) || str[j] == '/')) {
+    while (j > 0 && (std::isspace(str[j]) || str[j] == '/')) {
        j--;
     }
     str = str.substr(i, j + 1);
@@ -37,9 +37,9 @@ void	init_default_params(config& conf) {
 				rt.index.push_back(DEF_INDEX);
 			rt.root = rt.root.empty() ? DEF_ROOT : rt.root;
 			if (rt.route_name != "/")
-				strTrim(rt.route_name);
+				pathTrim(rt.route_name);
 			if (rt.root != "/")
-				strTrim(rt.root);
+				pathTrim(rt.root);
 	}
 }
 

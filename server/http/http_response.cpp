@@ -104,7 +104,7 @@ http_response::http_response(http_request &req,struct pollfd *fd,std::string &ho
     content_remaining = 0;
     conf = get_config(host,port,request.get_path(),req.get_header("HOST"));
     std::cerr <<"["<< host << "] [" + port + "] [" + request.get_path() + "] [" + req.get_header("HOST") + "]\n";
-    std::cerr <<"THE '/' is added to the root end, do not add it again!\n";
+    std::cerr <<"\n⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔\n THE '/' is NOT added to the root end any more, because it can be a file not a dir.\n you have to check if the file/dir is exist with stat() if NOT return 404.\n if YES then you can add '/' if it's a dir of just return it if it's a file,\n SHEEEEEEEEESH !!!!\n⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔\n\n";
     std::cout << "------------------ " << conf.root <<  "----" << std::endl;
     std::map<std::string,int> met_map;
     met_map["GET"] = GET;
@@ -137,9 +137,10 @@ void http_response::check_state()
     {
         if (S_ISDIR(s.st_mode))
         {
+            conf.root += "/"; //added for tests
             for (int i = 0;i < conf.index.size();i++)
             {
-                std::ifstream f(conf.root + conf.index[i]);
+                std::ifstream f(conf.root + "/" + conf.index[i]);
                 std::cout << "------ ::::: " << conf.root + conf.index[i] << std::endl; 
                 if (f.good())
                 {
