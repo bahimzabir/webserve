@@ -102,9 +102,10 @@ http_response::http_response(http_request &req,struct pollfd *fd,std::string &ho
     content_type["avi"] =  "video/x-msvideo";
 
     content_remaining = 0;
+    void (http_response::*state_handlers[3])() = {&http_response::GET_check_state,&http_response::POST_check_state,&http_response::DELETE_check_state};
     conf = get_config(host,port,request.get_path(),req.get_header("HOST"));
     std::cerr <<"["<< host << "] [" + port + "] [" + request.get_path() + "] [" + req.get_header("HOST") + "]\n";
-    std::cerr <<"\n⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔\n THE '/' is NOT added to the root end any more, because it can be a file not a dir.\n you have to check if the file/dir is exist with stat() if NOT return 404.\n if YES then you can add '/' if it's a dir of just return it if it's a file,\n SHEEEEEEEEESH !!!!\n⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔⛔\n\n";
+    std::cerr <<"THE '/' is added to the root end, do not add it again!\n";
     std::cout << "------------------ " << conf.root <<  "----" << std::endl;
     std::map<std::string,int> met_map;
     met_map["GET"] = GET;
@@ -118,50 +119,12 @@ http_response::http_response(http_request &req,struct pollfd *fd,std::string &ho
         if (conf.methods[0] != "ALL" && std::find(conf.methods.begin(),conf.methods.end(),request.get_method()) == conf.methods.end())
             throw NOT_ALLOWED;
         type = met_map[request.get_method()];
-        if (state == GET || state == DELETE)
-            client->events = POLLOUT;
-        check_state();
+        (this->*state_handlers[type])();
     }
     catch(int x)
     {
         ERROR_handler(x);
     }
-}
-
-void http_response::check_state()
-{
-    struct stat s;
-
-    std::cout << conf.root << std::endl;
-    if (stat(conf.root.c_str(),&s) == 0)
-    {
-        if (S_ISDIR(s.st_mode))
-        {
-            conf.root += "/"; //added for tests
-            for (int i = 0;i < conf.index.size();i++)
-            {
-                std::ifstream f(conf.root + "/" + conf.index[i]);
-                std::cout << "------ ::::: " << conf.root + conf.index[i] << std::endl; 
-                if (f.good())
-                {
-                    state = FILE;
-                    conf.root = conf.root + conf.index[i];
-                    type = GET;
-                    f.close();
-                    return;
-                }
-                f.close();
-            }
-            if (conf.autoindex)
-                state = LIST_DIRECTORY;
-            else
-                throw 403;
-        }
-        else
-            state = FILE;
-    }
-    else
-        throw 404;
 }
 
 
@@ -174,6 +137,7 @@ void http_response::generate_response()
     }
     catch(int x)
     {
+        std::cout << "ERROR   " << x << std::endl;
         ERROR_handler(x);
     }
 }
@@ -207,6 +171,8 @@ void http_response::ERROR_handler(int x)
     res_header = "";
     body = "";
     headers.clear();
+    file.close();
+    client->events = POLLOUT;
     if (x == 666)
         throw x;
     if (conf.err_pages[x] != "")

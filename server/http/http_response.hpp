@@ -15,9 +15,12 @@
 #define FILE 1
 #define LIST_DIRECTORY 2
 #define RESPONSE_BODY 3
-#define UPLOADING 4
-#define RESPONSE_ERROR 5
-#define END 6
+#define CHUNKED 4
+#define NORMAL 5
+#define UPLOADED 6
+#define CGI 7
+#define RESPONSE_ERROR 8
+#define END 9
 
 
 
@@ -36,7 +39,7 @@ class http_response
     std::map<std::string,std::string> headers;
     std::map<std::string,std::string> content_type;
     std::string res_header;
-    int content_remaining;
+    long long content_remaining;
     std::string body;
     std::fstream file;
     config_match conf;
@@ -53,10 +56,15 @@ class http_response
     void GET_open_input();
     void GET_body();
     void GET_list_directory();
+    void GET_check_state();
 
     void POST_handler();
+    void POST_check_state();
+    void POST_upload_normal_handler();
+    void POST_upload_chunked_handler();
 
     void DELETE_handler();
+    void DELETE_check_state();
 
     void SEND_handler();
     void ERROR_handler(int x);

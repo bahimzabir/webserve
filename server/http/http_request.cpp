@@ -12,12 +12,12 @@ void http_request::push_header(std::string &line)
     std::stringstream str_stream(line);
 
 
-    getline(str_stream,field,':');
+    std::getline(str_stream,field,':');
     for (int i = 0; i < field.size();i++)
         field[i] = toupper(field[i]);
     pair.first = field;
     
-    getline(str_stream,field,':');
+    std::getline(str_stream,field,':');
     for (int i = 0; i < field.size();i++)
         field[i] = toupper(field[i]);
     pair.second = field;
@@ -30,16 +30,16 @@ void http_request::http_header_handler()
     if (!remaining_nl)
         return;
     std::string line;
-    getline(remaining,line,'\n');
+    std::getline(remaining,line,'\n');
 
     std::stringstream str_stream(line);
     std::string field;
 
-    getline(str_stream,field,' ');
+    std::getline(str_stream,field,' ');
     http_header[0] = field;
-    getline(str_stream,field,' ');
+    std::getline(str_stream,field,' ');
     http_header[1] = field;
-    getline(str_stream,field,' ');
+    std::getline(str_stream,field,' ');
     http_header[2] = field;
     state = REQUEST_HEADERS;
     remaining_nl--;
@@ -51,14 +51,16 @@ void http_request::headers_handler()
     std::string line;
     while (remaining_nl)
     {
-        getline(remaining,line,'\n');
-        if (line == "")
+        std::getline(remaining,line,'\n');
+        std::cout << "*" << line << "*" << std::endl;
+        remaining_nl--;
+        if (line == "\r")
         {
+            std::cout << "blaan hna aasat" << std::endl;
             state = REQUEST_BODY;
             break;
         }
         push_header(line);
-        remaining_nl--;
     }
     //handle body;
 }
@@ -90,6 +92,7 @@ void http_request::parse_remaining(char *buffer,int len, int n_new_line)
     std::cout << "dkhlat" << state << std::endl;
     while (remaining_nl && state != REQUEST_BODY)
         (this->*handlers[state])();
+    std::cout << "dkhlat" << state << std::endl;
 }
 
 
@@ -116,4 +119,8 @@ const std::string &http_request::get_path()
 const std::string &http_request::get_version()
 {
     return http_header[2];
+}
+std::stringstream &http_request::get_remaining()
+{
+    return remaining;
 }

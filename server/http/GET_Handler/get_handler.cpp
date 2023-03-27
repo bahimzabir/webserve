@@ -11,9 +11,46 @@ size_t getSize(std::string filename)
     return 0;
 }
 
+void http_response::GET_check_state()
+{
+    client->events = POLLOUT;
+    struct stat s;
+    conf.root = "/Users/hait-moh/Desktop/webserv/webserve" + request.get_path();
+    std::cout << conf.root << std::endl;
+    if (stat(conf.root.c_str(),&s) == 0)
+    {
+        if (S_ISDIR(s.st_mode))
+        {
+            for (int i = 0;i < conf.index.size();i++)
+            {
+                std::ifstream f(conf.root + "/" + conf.index[i]);
+                std::cout << "------ ::::: " << conf.root + conf.index[i] << std::endl; 
+                if (f.good())
+                {
+                    state = FILE;
+                    conf.root = conf.root + conf.index[i];
+                    type = GET;
+                    f.close();
+                    return;
+                }
+                f.close();
+            }
+            if (conf.autoindex)
+                state = LIST_DIRECTORY;
+            else
+                throw 403;
+        }
+        else
+            state = FILE;
+    }
+    else
+        throw 404;
+}
+
+
 void http_response::GET_open_input()
 {
-    std::string file_path = conf.root;
+    std::string file_path = "/Users/hait-moh/Desktop/webserv/webserve" + request.get_path();
     std::cout << file_path << std::endl;
     file.open(file_path);
     if (!file)
@@ -25,7 +62,7 @@ void http_response::GET_open_input()
     if (ext != conf.root && content_type.count(ext))
         headers["Content-Type"] = content_type[ext];
     else
-        headers["Content-Type"] = "text/plain";
+        headers["Content-Type"] = "application/octet-stream";
     for (std::map<std::string,std::string>::iterator it = headers.begin(); it != headers.end(); it++)
         res_header +=  (*it).first + ":" + (*it).second + "\n";
     res_header += "\n";
@@ -35,11 +72,13 @@ void http_response::GET_open_input()
 void http_response::GET_body()
 {
     char buffer[10001];
-    file.read(buffer,10000);
-    buffer[file.gcount()] = 0;
-    body.append(buffer,file.gcount());
-    std::cout << file.gcount() << std::endl;
-
+    if (body == "" && res_header == "")
+    {
+        file.read(buffer,10000);
+        buffer[file.gcount()] = 0;
+        body.append(buffer,file.gcount());
+        std::cout << file.gcount() << std::endl;
+    }
     SEND_handler();
     if (!file.good() && !file.eof())
     {

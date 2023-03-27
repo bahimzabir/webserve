@@ -34,4 +34,5 @@ class http_request
         bool isValidHttpRequest();
         int get_state();
         std::string get_header(const std::string &header);
+        std::stringstream &get_remaining();
 };
