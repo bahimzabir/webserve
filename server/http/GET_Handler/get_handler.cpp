@@ -29,11 +29,15 @@ void http_response::GET_check_state()
                 {
                     state = FILE;
                     conf.root = conf.root + conf.index[i];
-                    type = GET;
+                    if (check_cgi(conf.index[i]))
+                        type = CGI;
+                    else
+                        type = GET;
                     f.close();
-                    return;
+                    break;
                 }
-                f.close();
+                else if (f.is_open())
+                    f.close();
             }
             if (conf.autoindex)
                 state = LIST_DIRECTORY;
@@ -41,10 +45,24 @@ void http_response::GET_check_state()
                 throw FORBIDDEN;
         }
         else
-            state = FILE;
+        {
+            if (check_cgi(conf.root))
+                type = CGI;
+            else
+                state = FILE;
+        }
     }
     else
         throw NOT_FOUND;
+    if (type == CGI)
+    {
+        std::string output = "/tmp/XXXXXX";
+        int fd = mkstemp(&output[0]);
+        if (fd == -1)
+            throw SERVER_ERROR;
+        cgi_data.output = output;
+        cgi_data.output_fd = fd;
+    }
 }
 
 

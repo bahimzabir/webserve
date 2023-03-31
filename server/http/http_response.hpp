@@ -88,6 +88,8 @@ class http_response
 
 
     void CGI_handler();
+    int check_cgi(std::string &index);
+
 
     void SEND_handler();
     void ERROR_handler(int x);
@@ -100,4 +102,4 @@ class http_response
 };
 
 std::string int_to_string(int a);
-
+std::string extention(std::string &file);

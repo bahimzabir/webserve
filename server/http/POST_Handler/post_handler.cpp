@@ -127,40 +127,36 @@ void http_response::POST_check_cgi()
         {
             for (int i = 0;i < conf.index.size();i++)
             {
-                for (int c = 0; c < conf.cgi_pass.size();c++)
+                if (check_cgi(conf.index[i]))
                 {
-                    if (extention(conf.index[i]) == conf.cgi_pass[c].cgi_pass)
+                    std::ifstream f(conf.root + "/" + conf.index[i]);
+                    if (f.good())
                     {
-                        std::ifstream f(conf.root + "/" + conf.index[i]);
-                        if (f.good())
-                        {
-                            is_cgi = 1;
-                            conf.upload_pass = "/tmp";
-                            conf.root = conf.root + "/" + conf.index[i];
-                            f.close();
-                            return;
-                        }
+                        is_cgi = 1;
+                        conf.upload_pass = "/tmp";
+                        conf.root = conf.root + "/" + conf.index[i];
                         f.close();
+                        return;
                     }
+                    else if (f.is_open())
+                        f.close();
                 }
             }
         }
         else
         {
-            for (int c = 0; c < conf.cgi_pass.size();c++)
-            {  
-                if (extention(conf.root) == conf.cgi_pass[c].cgi_pass)
+            if (check_cgi(conf.root))
+            {
+                std::ifstream f(conf.root);
+                if (f.good())
                 {
-                    std::ifstream f(conf.root);
-                    if (f.good())
-                    {
-                        is_cgi = 1;
-                        conf.upload_pass = "/tmp";
-                        f.close();
-                        return;
-                    }
+                    is_cgi = 1;
+                    conf.upload_pass = "/tmp";
                     f.close();
+                    return;
                 }
+                else if (f.is_open())
+                    f.close();
             }
         }
     }

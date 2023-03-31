@@ -3,6 +3,7 @@
 
 
 
+
 http_response::http_response(http_request &req,struct pollfd *fd,std::string &host,std::string &port) : request(req)
 {
     content_type["html"] =  "text/html";
@@ -187,13 +188,15 @@ void http_response::ERROR_handler(int x)
     res_header = "";
     body = "";
     headers.clear();
-    file.close();
+    if (file.is_open())
+        file.close();
     client->events = POLLOUT;
     if (x == END)
         throw x;
     if (conf.err_pages[x] != "")
     {
         std::ifstream file(conf.err_pages[x]);
+        conf.err_pages[x] = "";
         if (file.good())
         {
             conf.root = conf.err_pages[x];
@@ -202,6 +205,8 @@ void http_response::ERROR_handler(int x)
             file.close();
             return;
         }
+        else if (file.is_open())
+            file.close();
     }
     error_pages_map errors;
     body += errors.get_error(x);
@@ -215,6 +220,16 @@ void http_response::ERROR_handler(int x)
     std::cout << body.size() << " " << res_header.size() << std::endl;
     type = SEND;
 }                                          
+
+int http_response::check_cgi(std::string &file)
+{
+    for (int c = 0; c < conf.cgi_pass.size();c++)
+    {  
+        if (extention(file) == conf.cgi_pass[c].cgi_pass)
+            return 1;
+    }
+    return 0;
+}
 
 std::string int_to_string(int a)
 {
