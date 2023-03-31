@@ -1,13 +1,14 @@
 #include "servers.hpp"
 
 
-int count_nl (char *str)
+int count_nl (char *str,int len)
 {
     int nl = 0;
-    while (*str)
+    int i = 0;
+    while (i < len)
     {
-        nl += ((*str) == '\n');
-        str++;
+        nl += ((str[i]) == '\n');
+        i++;
     }
     return nl;
 }
@@ -21,14 +22,11 @@ void servers::client_req_handler(int &index)
     int ret;
     ret = recv(fd_poll[index].fd,buffer,1024,0);
     if (ret == -1)
-        throw 666;
+        throw END;
     buffer[ret] = 0;
-    std::cout << "blan1\n" << std::endl;
-    data[index].request.parse_remaining(buffer,ret,count_nl(buffer));
-    std::cout << "blan2\n" << std::endl;
+    data[index].request.parse_remaining(buffer,ret,count_nl(buffer,ret));
     if (data[index].request.get_state() == REQUEST_BODY)
     {
-        std::cout << "salat\n" << std::endl;
         fd_poll[index].events = POLLOUT;
         data[index].type = RESPONSE;
         data[index].response = new http_response(data[index].request,&(fd_poll[index]),data[index].host,data[index].port);
@@ -44,6 +42,7 @@ void servers::client_res_handler(int &index)
     data[index].response->generate_response();
     
 }
+
 void servers::listener_handler(int &index)
 {
     

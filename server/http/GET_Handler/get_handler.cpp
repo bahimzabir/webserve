@@ -38,13 +38,13 @@ void http_response::GET_check_state()
             if (conf.autoindex)
                 state = LIST_DIRECTORY;
             else
-                throw 403;
+                throw FORBIDDEN;
         }
         else
             state = FILE;
     }
     else
-        throw 404;
+        throw NOT_FOUND;
 }
 
 
@@ -54,7 +54,7 @@ void http_response::GET_open_input()
     std::cout << file_path << std::endl;
     file.open(file_path);
     if (!file)
-        throw 403;
+        throw FORBIDDEN;
     res_header += "HTTP/1.1 200 OK\n";
     content_remaining = getSize(file_path);
     headers["Content-Length"] = int_to_string(content_remaining);
@@ -94,7 +94,7 @@ void http_response::GET_list_directory()
     struct dirent *d;
     directory = opendir(conf.root.c_str());
     if (!directory)
-        throw 403;
+        throw FORBIDDEN;
     d = readdir(directory);
     while (d)
     {

@@ -1,14 +1,93 @@
 #include "../http_response.hpp"
 
 
+int new_line(std::string &body)
+{
+    int i = 0;
+    if (i < body.size() && body[i] == '\r')
+        i++;
+    if (i < body.size() && body[i] == '\n')
+        i++;
+    while(i < body.size())
+    {
+        if (body[i] == '\n')
+            return 1;
+        i++;
+    }
+    return 0;
+}
+
+void remove_white_spaces(std::string &body)
+{
+
+    if (body.size() && body[0] == '\r')
+        body.erase(0,1);
+    if (body.size() && body[0] == '\n')
+        body.erase(0,1);
+}
+
+std::string extention(std::string &file)
+{
+    int pos = file.find_last_of('.');
+    if (pos == std::string::npos)
+        return "";
+    return file.substr(pos + 1);
+}
+
+
 void http_response::POST_upload_chunked_handler(void)
 {
     char buffer[2048];
     int ret = 0;
-    if (content_remaining != -1)
-        ret = recv(client->fd,buffer,2048,0);
-    body.append(buffer,ret);
-    
+    int amount = 0;
+    std::string substring;
+    if (content_remaining != -1 && (body == "" || !new_line(body)))
+    { 
+        if ((client->events & POLLIN) && (client->revents & POLLIN))
+            ret = recv(client->fd,buffer,2048,0);
+        if (ret == -1)
+            throw END;
+        body.append(buffer,ret);
+    }
+    while (1)
+    {
+        if (body == "" || (!content_remaining && !new_line(body)))
+            break;
+        if (!content_remaining)
+        {
+            while (!content_remaining && new_line(body))
+            {
+                remove_white_spaces(body);
+                substring = body.substr(0,body.find('\n'));
+                content_remaining = strtoll(substring.c_str(),NULL,16);
+                if (errno == ERANGE)
+                    throw BAD_REQUEST;
+                if (!content_remaining)
+                    throw CREATED;
+                if (content_remaining < 0)
+                    throw BAD_REQUEST;
+                body.erase(0,substring.size());
+                remove_white_spaces(body);
+                amount = (body.size() > content_remaining) ? content_remaining : body.size();
+                substring = body.substr(0,amount);
+                content_remaining -= amount;
+                body.erase(0,amount);
+                file.write(substring.c_str(),amount);
+                if (!file.good())
+                    throw SERVER_ERROR;
+            }
+        }
+        else if (content_remaining)
+        {
+            amount = (body.size() > content_remaining) ? content_remaining : body.size();
+            substring = body.substr(0,amount);
+            content_remaining -= amount;
+            body.erase(0,amount);
+            file.write(substring.c_str(),amount);
+            if (!file.good())
+                throw SERVER_ERROR;
+        }
+    }
 }
 
 void http_response::POST_upload_normal_handler(void)
@@ -17,10 +96,10 @@ void http_response::POST_upload_normal_handler(void)
     char buffer[2048];
     int ret = 0;
     int size = 0;
-    if (content_remaining != -1)
+    if (content_remaining != -1 && body.size() == 0)
         ret = recv(client->fd,buffer,2048,0);
     if (ret == -1)
-        throw 500;
+        throw END;
     if (content_remaining == -1)
         content_remaining = body.size();
     body.append(buffer,ret);
@@ -31,68 +110,128 @@ void http_response::POST_upload_normal_handler(void)
     body.erase(0,size);
     content_remaining -= size;
     if (!file.good())
-        throw 500;
+        throw SERVER_ERROR;
     if (!content_remaining)
-        throw 201;
+        throw CREATED;
 }
 
 
+
+void http_response::POST_check_cgi()
+{
+    struct stat s;
+    conf.index[0] = "index.php";
+    if (stat(conf.root.c_str(),&s) == 0)
+    {
+        if (S_ISDIR(s.st_mode))
+        {
+            for (int i = 0;i < conf.index.size();i++)
+            {
+                for (int c = 0; c < conf.cgi_pass.size();c++)
+                {
+                    if (extention(conf.index[i]) == conf.cgi_pass[c].cgi_pass)
+                    {
+                        std::ifstream f(conf.root + "/" + conf.index[i]);
+                        if (f.good())
+                        {
+                            is_cgi = 1;
+                            conf.upload_pass = "/tmp";
+                            conf.root = conf.root + "/" + conf.index[i];
+                            f.close();
+                            return;
+                        }
+                        f.close();
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (int c = 0; c < conf.cgi_pass.size();c++)
+            {  
+                if (extention(conf.root) == conf.cgi_pass[c].cgi_pass)
+                {
+                    std::ifstream f(conf.root);
+                    if (f.good())
+                    {
+                        is_cgi = 1;
+                        conf.upload_pass = "/tmp";
+                        f.close();
+                        return;
+                    }
+                    f.close();
+                }
+            }
+        }
+    }
+}
+
 void http_response::POST_check_state()
 {
+    //UPLOAD
+
     client->events = POLLIN;
     char buffer[5000];
     int ret = 0;
     request.get_remaining().read(buffer,5000);
     ret = request.get_remaining().gcount();
-    std::string rem(buffer,ret);
-
-    if (content_remaining < 0)
-        throw 400;
+    state = CHUNKED;
     if (request.get_header("TRANSFER-ENCODING") == "chunked")
-        state = CHUNKED;
+        content_remaining = 0;
     else
+    {
+        content_remaining = strtoll(request.get_header("CONTENT-LENGTH").c_str(),NULL,10);
         state = NORMAL;
-    content_remaining = std::stoll(request.get_header("CONTENT-LENGTH"));
-    if (request.get_header("TRANSFER-ENCODING") == "chunked" && rem.find("\n0\n") != std::string::npos)
-    {
-        content_remaining = -1;
-        client->events = POLLOUT;
+        if (content_remaining <= ret)
+        {
+            content_remaining = -1;
+            client->events = POLLOUT;
+        }
     }
-    if (std::stoll(request.get_header("CONTENT-LENGTH")) <= rem.size())
-    {
-        content_remaining = -1;
-        client->events = POLLOUT;
-    }
-    conf.upload_pass = "/Users/hait-moh/Desktop/webserv/webserve";
-
+    
+    conf.cgi_pass.push_back(cgi());
+    std::cout << conf.cgi_pass.size() << std::endl;
+    conf.cgi_pass[0].cgi_param = "./blan"; //cgi binary location
+    conf.cgi_pass[0].cgi_pass = "php"; // extention
+    conf.root = "/Users/hait-moh/Desktop/webserv/webserve/index.php"; //script
+    if (conf.upload_pass == "")
+        POST_check_cgi();
+    conf.upload_pass = "/tmp";
     if (conf.upload_pass != "")
     {
-        std::string name = request.get_method();
-        int name_start = name.find_last_of('/');
-        if (name_start == std::string::npos || name.substr(name_start) == "")
-        {
+        std::string name;
+        if (!is_cgi && request.get_header("FILE_NAME") != "")
+            name = conf.upload_pass + '/' + request.get_header("FILE_NAME");
+        else
             name = conf.upload_pass + "/XXXXXX";
-            int fd = mkstemp(&name[0]);
+        int fd = mkstemp(&name[0]);
+        if (fd == -1)
+            throw SERVER_ERROR;
+        cgi_data.input = name;
+        if (is_cgi)
+        {
+            cgi_data.input_fd = fd;
+            std::string output = conf.upload_pass + "/XXXXXX";
+            int fd = mkstemp(&output[0]);
             if (fd == -1)
-                throw 500;
-            close(fd);
+                throw SERVER_ERROR;
+            cgi_data.output = output;
+            cgi_data.output_fd = fd;
         }
         else
-            name = name.substr(name_start);
-        std::cout << name << std::endl;
+            close(fd);
         file.open(name);
         if (!file.good())
-        {
-            std::cout << "mablanch" << std::endl;
             throw 403;
-        }
-        body += rem;
+        body.append(buffer,ret);
+        std::cout << body << std::endl;
+        client->revents = 0;
+        if (state == CHUNKED)
+            POST_upload_chunked_handler();
         return;
     }
-    for (int i =0; i < conf.cgi_pass.size();i++)
-    {
-        std::cout << conf.cgi_pass[i].cgi_param << std::endl;
-    }
+    //CGI
+    throw FORBIDDEN;
 }
 
 void http_response::POST_handler()

@@ -1,5 +1,27 @@
 #include "http_request.hpp"
 
+void trim_field(std::string &field)
+{
+    int beg = 0;
+    int end = 0;
+    
+    for (int i = 0;i < field.size();i++)
+    {
+        if (isspace(field[i]))
+            beg++;
+        else
+            break;
+    }
+    for (int i = field.size();i > beg; i--)
+    {
+        if (isspace(field[i - 1]))
+            end++;
+        else
+            break;
+    }
+    field = field.substr(beg,field.size() - (beg + end));
+}
+
 
 http_request::http_request()
 {
@@ -17,9 +39,8 @@ void http_request::push_header(std::string &line)
         field[i] = toupper(field[i]);
     pair.first = field;
     
-    std::getline(str_stream,field,':');
-    for (int i = 0; i < field.size();i++)
-        field[i] = toupper(field[i]);
+    std::getline(str_stream,field);
+    trim_field(field);
     pair.second = field;
     headers.push_back(pair);
 }
@@ -56,7 +77,6 @@ void http_request::headers_handler()
         remaining_nl--;
         if (line == "\r")
         {
-            std::cout << "blaan hna aasat" << std::endl;
             state = REQUEST_BODY;
             break;
         }

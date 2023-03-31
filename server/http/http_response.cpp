@@ -112,6 +112,7 @@ http_response::http_response(http_request &req,struct pollfd *fd,std::string &ho
     met_map["POST"] = POST;
     met_map["DELETE"] = DELETE;
     client = fd;
+    is_cgi = 0;
     try
     {
         if (met_map.find(request.get_method()) == met_map.end())
@@ -123,6 +124,13 @@ http_response::http_response(http_request &req,struct pollfd *fd,std::string &ho
     }
     catch(int x)
     {
+        if (x == CREATED && is_cgi)
+        {
+            is_cgi = 0;
+            type = CGI;
+            client->events = POLLOUT;
+            return;
+        }
         ERROR_handler(x);
     }
 }
@@ -130,7 +138,7 @@ http_response::http_response(http_request &req,struct pollfd *fd,std::string &ho
 
 void http_response::generate_response()
 {
-    void (http_response::*handlers[4])() = {&http_response::GET_handler,&http_response::POST_handler,&http_response::DELETE_handler,&http_response::SEND_handler};
+    void (http_response::*handlers[5])() = {&http_response::GET_handler,&http_response::POST_handler,&http_response::DELETE_handler,&http_response::CGI_handler,&http_response::SEND_handler};
     try
     {
         (this->*handlers[type])();
@@ -138,6 +146,14 @@ void http_response::generate_response()
     catch(int x)
     {
         std::cout << "ERROR   " << x << std::endl;
+        if (x == CREATED && is_cgi)
+        {
+            is_cgi = 0;
+            type = CGI;
+            client->events = POLLOUT;
+            std::cout << "blyaaat" << std::endl;
+            return;
+        }
         ERROR_handler(x);
     }
 }
@@ -152,7 +168,7 @@ void http_response::SEND_handler()
     else
         ret = send(client->fd,body.c_str(),body.size(),0);
     if (ret == -1)
-        throw 666;
+        throw END;
     if (res_header == "")
         content_remaining -= ret;
     if (res_header != "")
@@ -162,7 +178,7 @@ void http_response::SEND_handler()
     if (res_header == "" && !content_remaining)
     {
         std::cout << "rah salaw" << std::endl;
-        throw 666;
+        throw END;
     }
 }
 
@@ -173,7 +189,7 @@ void http_response::ERROR_handler(int x)
     headers.clear();
     file.close();
     client->events = POLLOUT;
-    if (x == 666)
+    if (x == END)
         throw x;
     if (conf.err_pages[x] != "")
     {

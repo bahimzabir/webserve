@@ -16,6 +16,7 @@ servers::servers()
                 sockets.push_back(_socket(config_info[i].host,config_info[i].ports[port_index]));
                 d.host = config_info[i].host;
                 d.port = config_info[i].ports[port_index];
+                d.response = NULL;
                 data.push_back(d);
                 p.fd = sockets[index].get_socket_fd();
                 p.events = POLLIN;
@@ -25,11 +26,15 @@ servers::servers()
             }
             catch(int x)
             {
-                if (x < 0)
+                if (x >= 0)
                     close(x);
-                std::cout << "error" << std::endl;
             }
         }
+    }
+    if (!sockets.size())
+    {
+        std::cerr << "No server On" << std::endl;
+        exit(0);
     }
 }
 int servers::deploy()
@@ -52,7 +57,7 @@ int servers::deploy()
                 }
                 catch (int status)
                 {
-                    if (status == 666)
+                    if (status == END)
                     {
                         close(fd_poll[i].fd);
                         fd_poll.erase(fd_poll.begin() + i);

@@ -18,18 +18,36 @@
 #define CHUNKED 4
 #define NORMAL 5
 #define UPLOADED 6
-#define CGI 7
 #define RESPONSE_ERROR 8
-#define END 9
+
 
 
 
 #define GET 0 
 #define POST 1
 #define DELETE 2
-#define SEND 3
+#define CGI 3
+#define SEND 4
+
+
+
 #define NOT_IMPLEMENTED 501
 #define NOT_ALLOWED 405
+#define END 666
+#define CREATED 201
+#define BAD_REQUEST 400
+#define SERVER_ERROR 500
+#define FORBIDDEN 403
+#define NOT_FOUND 404
+
+struct t_cgi_data
+{
+    int pid;
+    std::string input;
+    int input_fd;
+    std::string output;
+    int output_fd;
+};
 
 
 class http_response
@@ -46,7 +64,8 @@ class http_response
     struct pollfd *client;
     int type;
     int state;
-
+    bool is_cgi;
+    t_cgi_data cgi_data;
 
 
     void add_headers();
@@ -62,9 +81,13 @@ class http_response
     void POST_check_state();
     void POST_upload_normal_handler();
     void POST_upload_chunked_handler();
+    void POST_check_cgi();
 
     void DELETE_handler();
     void DELETE_check_state();
+
+
+    void CGI_handler();
 
     void SEND_handler();
     void ERROR_handler(int x);
