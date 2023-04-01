@@ -42,13 +42,27 @@
 
 struct t_cgi_data
 {
-    int pid;
-    std::string input;
-    int input_fd;
-    std::string output;
-    int output_fd;
+	int	pid;
+	std::string	input;
+	int	input_fd;
+	std::string	output;
+	int	output_fd;
+
 };
 
+class cgii
+{
+	std::map<std::string, std::string> env;
+	std::map<std::string, std::string> header;
+
+	public:
+	// void			setEnv();
+	void execution();
+	std::string getScript(const std::string &uri);
+	std::string getQueries(const std::string &uri);
+	// http_request	req;
+	// http_response	res;
+};
 
 class http_response
 {
@@ -65,7 +79,8 @@ class http_response
     int type;
     int state;
     bool is_cgi;
-    t_cgi_data cgi_data;
+    // cgi cgi_data;
+	t_cgi_data	cgi_data;
 
 
     void add_headers();

@@ -187,10 +187,10 @@ void http_response::POST_check_state()
     
     conf.cgi_pass.push_back(cgi());
     std::cout << conf.cgi_pass.size() << std::endl;
-    conf.cgi_pass[0].cgi_param = "./blan"; //cgi binary location
-    conf.cgi_pass[0].cgi_pass = "php"; // extention
-    conf.root = "/Users/hait-moh/Desktop/webserv/webserve/index.php"; //script
-    if (conf.upload_pass == "")
+	conf.cgi_pass[0].cgi_param = "/Users/yagnaou/Desktop/weee/php-cgi"; // cgi binary location
+	conf.cgi_pass[0].cgi_pass = "php"; // extention
+	conf.root = "/Users/yagnaou/Desktop/weee/index.php"; // script
+	if (conf.upload_pass == "")
         POST_check_cgi();
     conf.upload_pass = "/tmp";
     if (conf.upload_pass != "")
