@@ -15,7 +15,6 @@ void http_response::GET_check_state()
 {
     client->events = POLLOUT;
     struct stat s;
-    conf.root = "/Users/hait-moh/Desktop/webserv/webserve" + request.get_path();
     std::cout << conf.root << std::endl;
     if (stat(conf.root.c_str(),&s) == 0)
     {
@@ -24,17 +23,18 @@ void http_response::GET_check_state()
             for (int i = 0;i < conf.index.size();i++)
             {
                 std::ifstream f(conf.root + "/" + conf.index[i]);
-                std::cout << "------ ::::: " << conf.root + conf.index[i] << std::endl; 
+                std::cout << "------ ::::: " << conf.root + "/" + conf.index[i] << std::endl; 
                 if (f.good())
                 {
                     state = FILE;
-                    conf.root = conf.root + conf.index[i];
+                    conf.root = conf.root +  "/" + conf.index[i];
                     if (check_cgi(conf.index[i]))
                         type = CGI;
                     else
                         type = GET;
+                    std::cout << "   *-" << state << std::endl;
                     f.close();
-                    break;
+                    return;
                 }
                 else if (f.is_open())
                     f.close();
@@ -49,7 +49,7 @@ void http_response::GET_check_state()
             if (check_cgi(conf.root))
                 type = CGI;
             else
-                state = FILE;
+                type = FILE;
         }
     }
     else
@@ -68,13 +68,12 @@ void http_response::GET_check_state()
 
 void http_response::GET_open_input()
 {
-    std::string file_path = "/Users/hait-moh/Desktop/webserv/webserve" + request.get_path();
-    std::cout << file_path << std::endl;
-    file.open(file_path);
+    file.open(conf.root);
+    
     if (!file)
         throw FORBIDDEN;
     res_header += "HTTP/1.1 200 OK\n";
-    content_remaining = getSize(file_path);
+    content_remaining = getSize(conf.root);
     headers["Content-Length"] = int_to_string(content_remaining);
     std::string ext = (conf.root).substr(conf.root.find_last_of(".") + 1);
     if (ext != conf.root && content_type.count(ext))
@@ -132,6 +131,8 @@ void http_response::GET_list_directory()
 
 void http_response::GET_handler()
 {
+    std::cout << "dsad ----------- [" << conf.root << "]" << std::endl;
+    std::cout << state << std::endl;
     std::cout << "GET_H" << std::endl;
     if (state == FILE)
         GET_open_input();

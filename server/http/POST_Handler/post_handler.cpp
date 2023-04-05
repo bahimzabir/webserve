@@ -120,7 +120,6 @@ void http_response::POST_upload_normal_handler(void)
 void http_response::POST_check_cgi()
 {
     struct stat s;
-    conf.index[0] = "index.php";
     if (stat(conf.root.c_str(),&s) == 0)
     {
         if (S_ISDIR(s.st_mode))
@@ -185,14 +184,8 @@ void http_response::POST_check_state()
         }
     }
     
-    conf.cgi_pass.push_back(cgi());
-    std::cout << conf.cgi_pass.size() << std::endl;
-	conf.cgi_pass[0].cgi_param = "/Users/yagnaou/Desktop/weee/php-cgi"; // cgi binary location
-	conf.cgi_pass[0].cgi_pass = "php"; // extention
-	conf.root = "/Users/yagnaou/Desktop/weee/index.php"; // script
 	if (conf.upload_pass == "")
         POST_check_cgi();
-    conf.upload_pass = "/tmp";
     if (conf.upload_pass != "")
     {
         std::string name;

@@ -105,6 +105,27 @@ http_response::http_response(http_request &req,struct pollfd *fd,std::string &ho
     content_remaining = 0;
     void (http_response::*state_handlers[3])() = {&http_response::GET_check_state,&http_response::POST_check_state,&http_response::DELETE_check_state};
     conf = get_config(host,port,request.get_path(),req.get_header("HOST"));
+    for (int i = 0; i <  conf.methods.size(); i++) {
+        std::cout << "method: [" << conf.methods[i] << "]\n";
+    }
+        std::cout << "root: [" << conf.root << "]\n"; 
+    for (int i = 0; i <  conf.index.size(); i++) {
+        std::cout << "index: [" << conf.index[i] << "]\n";
+    }
+    std::cout << "autoindex: [" << conf.autoindex << "]\n";
+    std::cout << "upload_pass: [" << conf.upload_pass << "]\n";
+    for (int i = 0; i <  conf.cgi_pass.size(); i++) {
+        std::cout << "cgi_param: [" << conf.cgi_pass[i].cgi_param << "]\n";
+        std::cout << "cgi_pass: [" << conf.cgi_pass[i].cgi_pass << "]\n";
+    }
+    std::cout << "mcbs: [" << conf.client_max_body_size << "]\n";
+    for (std::map<int, std::string>::iterator it = conf.err_pages.begin(); it != conf.err_pages.end(); it++)
+    {
+        std::cout << "err_page: [" << it->first << "-" << it->second << "]\n";
+    }
+    std::cout << "ret_value: [" << conf.return_value << "]\n";
+
+
     std::cerr <<"["<< host << "] [" + port + "] [" + request.get_path() + "] [" + req.get_header("HOST") + "]\n";
     std::cerr <<"THE '/' is added to the root end, do not add it again!\n";
     std::cout << "------------------ " << conf.root <<  "----" << std::endl;

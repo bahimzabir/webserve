@@ -1,6 +1,26 @@
 #include "config_matcher.hpp"
 #include <algorithm>
 
+std::vector<std::string> pathToVec(std::string& path) {
+
+	std::vector<std::string>	vpath;
+	size_t						len = path.length();
+	std::string 				tmp;
+
+	//vpath.push_back("/");
+	for(size_t i = 0; i < len; i++) {
+	
+		while (i < len && path[i] != '/') {
+			tmp += path[i];
+			i++;
+		}
+		if (tmp != "")
+			vpath.push_back(tmp);
+		tmp = "";
+	}
+	return vpath;
+}
+
 config_match& config_struct_fill(route& rout, long cmbs, std::map<int, std::string>& error_p, std::string newRoot) {
 
 	config_match *conf = new config_match();
@@ -11,8 +31,7 @@ config_match& config_struct_fill(route& rout, long cmbs, std::map<int, std::stri
 	// if (rout.root.back() != '/')
 	// 	conf->root += "/";
 	pathTrim(conf->root);
-	conf->root = "/" + conf->root;
-	std::cerr << conf->root << "\n";
+	// std::cerr <<"f_root = "<< conf->root << "\n";
 	conf->index = rout.index;
 	conf->autoindex = rout.autoindex;
 	conf->upload_pass = rout.upload_pass;
@@ -23,20 +42,44 @@ config_match& config_struct_fill(route& rout, long cmbs, std::map<int, std::stri
 	return *conf;
 }
 
-route& rout_matching(std::vector<route> routes, std::string rt_name) 
+route& rout_matching(std::vector<route> routes, std::string rt_name, std::string& rout2) 
 {	
 	route *rt = NULL;
-	int rt_len = rt_name.size();
-	int	vc_len = routes.size();
-	int r = 0;
 
-	//std::sort(routes , routes.end());
+	if (rt_name == "")
+		rt_name = "//";
+	int rt_len;
+	int	vc_len = routes.size();
+	std::vector<std::string> name_vpath;
+	std::vector<std::string> match_vpath;
+	std::vector<std::string> root_vpath;
+	std::string tmp;
+
+	name_vpath = pathToVec(rt_name);
+	rt_len = name_vpath.size();
 	for (int i = 0; i < vc_len; i++) {
-		if (routes[i].route_name.size() <= rt_len)
+		match_vpath = pathToVec(routes[i].route_name);
+		if (match_vpath.size() <= rt_len)
 		{
-			//std::cerr << "rout needed = " + rt_name + " to match = "+ routes[i].route_name + " size " << routes[i].route_name.size() << "\n";
-			if(rt_name.compare(0, routes[i].route_name.size(), routes[i].route_name) == 0) {
+			tmp = "";
+			// std::cerr << "rout_needed= ";
+			// for(int i = 0; i < rt_len; i++)
+			// 	std::cerr << "/" + name_vpath[i];
+			// std::cerr << " ";
+			// std::cerr << "to_much= ";
+			// for(int i = 0; i < match_vpath.size(); i++)
+			// 	std::cerr << "/" + match_vpath[i];
+			// std::cerr << "\n";
+			if(std::equal(match_vpath.begin(), match_vpath.end(), name_vpath.begin())) {
 				rt = &routes[i];
+				root_vpath = pathToVec(routes[i].root);
+				for(int i = 0; i < root_vpath.size(); i++)
+					tmp = tmp + "/" + root_vpath[i];
+				for(int i = match_vpath.size(); i < rt_len; i++)
+					tmp = tmp + "/" + name_vpath[i];
+				rout2 = tmp;
+				// std::cerr << "\nnew_root = " << rout2 << "\n\n";
+
 			}
 		}
 	}
@@ -63,49 +106,35 @@ config_match& get_config(std::string host, std::string port, std::string rout, s
 
 	config* match_lvl1 = NULL;
 	config* match_lvl2 = NULL;
-	config* match_lvl3 = NULL;
-	config* match_lvl4 = &config_info.back();
+	config* match_lvl3 = &config_info.back();
 	std::vector<route>::iterator r_it;
 	route rt;
-	route rt2;
 	std::string rout2;
 	rout2 = rout;
 
 	pathTrim(server_name);
 	pathTrim(rout);
-	std::cerr << "[" + server_name + "]\n";
+	// std::cerr << "[" + server_name + "]\n";
+	// std::cerr << "[" + rout + "]\n";
+	// std::cerr << "[" + host + "]\n";
+	// std::cerr << "[" + port + "]\n";
 	for (std::vector<config>::reverse_iterator it = config_info.rbegin(); it != config_info.rend(); it++) {
 		config& cf = *it;
 		if (cf.host == host && std::find(cf.ports.begin(), cf.ports.end(), port) != cf.ports.end())
 		{	
 			match_lvl1 = &cf;
+			rt = rout_matching(cf.routes, rout, rout2);
+			// std::cerr << "rout2 = " << rout2 << "\n";
 			if (std::find(cf.server_names.begin(), cf.server_names.end(), server_name) != cf.server_names.end())
-			{
-				rt2 = rout_matching(cf.routes, rout);
-				// std::cerr << "matching result of " + rout + " = " + rt2.route_name + "\n";
-				rout2.replace(0, rt2.route_name.size() + 1 ,rt2.root);
-				std::cerr << "result  = " + rout2 + "\n";
-
 				match_lvl2 = &cf;
-				// r_it = cf.routes.begin();
-				// while(r_it != cf.routes.end()) {
-				// 	rt = *r_it;
-				// 	if (rt.route_name == rout)
-				// 		break;
-				// 	r_it++;
-				// }
-				// if (r_it != cf.routes.end())
-				// 	match_lvl3 = &cf;
-			}
 		}
 	}
 
-	// if (match_lvl3)
-	// 	return (config_struct_fill(rt, match_lvl3->client_max_body_size, match_lvl3->error_pages));
 	if(match_lvl2)
-		return (config_struct_fill(rt2, match_lvl2->client_max_body_size, match_lvl2->error_pages, rout2));
-	else if(match_lvl1)
-		return (config_struct_fill(*match_lvl4->routes.begin(), match_lvl1->client_max_body_size, match_lvl1->error_pages, rout2));
+		return (config_struct_fill(rt, match_lvl2->client_max_body_size, match_lvl2->error_pages, rout2));
+	else if(match_lvl1) {
+		return (config_struct_fill(rt, match_lvl1->client_max_body_size, match_lvl1->error_pages, rout2));
+	}
 	else
-		return (config_struct_fill(*match_lvl4->routes.begin(), match_lvl4->client_max_body_size, match_lvl4->error_pages, rout2));
+		return (config_struct_fill(*match_lvl3->routes.begin(), match_lvl3->client_max_body_size, match_lvl3->error_pages, rout2));
 }
