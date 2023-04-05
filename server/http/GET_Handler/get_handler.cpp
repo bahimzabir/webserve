@@ -49,7 +49,10 @@ void http_response::GET_check_state()
             if (check_cgi(conf.root))
                 type = CGI;
             else
-                type = FILE;
+            {
+                type = GET;
+                state = FILE;
+            }
         }
     }
     else

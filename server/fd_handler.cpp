@@ -38,7 +38,6 @@ void servers::client_res_handler(int &index)
 {
     if (!((fd_poll[index].events & POLLOUT) && (fd_poll[index].revents & POLLOUT)) && !((fd_poll[index].events & POLLIN) && (fd_poll[index].revents & POLLIN)))
         return ;
-    std::cout << "RESPONSE" << std::endl;
     data[index].response->generate_response();
     
 }
