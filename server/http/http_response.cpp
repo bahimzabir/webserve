@@ -1,9 +1,5 @@
 #include "http_response.hpp"
 
-
-
-
-
 http_response::http_response(http_request &req,struct pollfd *fd,std::string &host,std::string &port) : request(req)
 {
     content_type["html"] =  "text/html";
@@ -105,7 +101,7 @@ http_response::http_response(http_request &req,struct pollfd *fd,std::string &ho
     content_remaining = 0;
     void (http_response::*state_handlers[3])() = {&http_response::GET_check_state,&http_response::POST_check_state,&http_response::DELETE_check_state};
     conf = get_config(host,port,request.get_path(),req.get_header("HOST"));
-    for (int i = 0; i <  conf.methods.size(); i++) {
+    /*for (int i = 0; i <  conf.methods.size(); i++) {
         std::cout << "method: [" << conf.methods[i] << "]\n";
     }
         std::cout << "root: [" << conf.root << "]\n"; 
@@ -128,12 +124,13 @@ http_response::http_response(http_request &req,struct pollfd *fd,std::string &ho
 
     std::cerr <<"["<< host << "] [" + port + "] [" + request.get_path() + "] [" + req.get_header("HOST") + "]\n";
     std::cerr <<"THE '/' is added to the root end, do not add it again!\n";
-    std::cout << "------------------ " << conf.root <<  "----" << std::endl;
+    std::cout << "------------------ " << conf.root <<  "----" << std::endl;*/
     std::map<std::string,int> met_map;
     met_map["GET"] = GET;
     met_map["POST"] = POST;
     met_map["DELETE"] = DELETE;
     client = fd;
+    client->events = POLLOUT;
     is_cgi = 0;
     try
     {
@@ -158,8 +155,9 @@ http_response::http_response(http_request &req,struct pollfd *fd,std::string &ho
 }
 
 
-void http_response::generate_response()
+void http_response::generate_response(pollfd *fd)
 {
+    client = fd;
     void (http_response::*handlers[5])() = {&http_response::GET_handler,&http_response::POST_handler,&http_response::DELETE_handler,&http_response::CGI_handler,&http_response::SEND_handler};
     try
     {
@@ -173,7 +171,7 @@ void http_response::generate_response()
             is_cgi = 0;
             type = CGI;
             client->events = POLLOUT;
-            std::cout << "blyaaat" << std::endl;
+            std::cout << "rah dkhl l CGI" << std::endl;
             return;
         }
         ERROR_handler(x);
@@ -184,7 +182,7 @@ void http_response::generate_response()
 void http_response::SEND_handler()
 {
     int ret;
-
+    std::cout << client->fd << std::endl;
     if (res_header != "")
         ret = send(client->fd,res_header.c_str(),res_header.size(),0);
     else
@@ -198,16 +196,14 @@ void http_response::SEND_handler()
     else
         body.erase(0,ret);
     if (res_header == "" && !content_remaining)
-    {
-        std::cout << "rah salaw" << std::endl;
         throw END;
-    }
 }
 
 void http_response::ERROR_handler(int x)
 {
-    res_header = "";
-    body = "";
+    std::cout << "Error asat ::  " << x << std::endl;
+    res_header.clear();
+    body.clear();
     headers.clear();
     if (file.is_open())
         file.close();
@@ -216,11 +212,11 @@ void http_response::ERROR_handler(int x)
         throw x;
     if (conf.err_pages[x] != "")
     {
-        std::ifstream file(conf.err_pages[x]);
-        conf.err_pages[x] = "";
+        file.open(conf.err_pages[x]);
         if (file.good())
         {
             conf.root = conf.err_pages[x];
+            conf.err_pages[x] = "";
             type = GET;
             state = FILE;
             file.close();
@@ -228,6 +224,7 @@ void http_response::ERROR_handler(int x)
         }
         else if (file.is_open())
             file.close();
+        conf.err_pages[x] = "";
     }
     error_pages_map errors;
     body += errors.get_error(x);

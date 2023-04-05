@@ -97,12 +97,11 @@ void http_response::GET_body()
         file.read(buffer,10000);
         buffer[file.gcount()] = 0;
         body.append(buffer,file.gcount());
-        std::cout << file.gcount() << std::endl;
     }
     SEND_handler();
     if (!file.good() && !file.eof())
     {
-        std::cout << body << std::endl;
+        std::cout << "error asat" << std::endl;
         throw 666;
     }
 }

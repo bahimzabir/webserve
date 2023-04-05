@@ -112,7 +112,7 @@ class http_response
 
     public:
         http_response(http_request &req,struct pollfd *fd,std::string &host,std::string &port);
-        void generate_response();
+        void generate_response(pollfd *fd);
 
 };
 

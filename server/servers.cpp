@@ -54,6 +54,7 @@ int servers::deploy()
                 try
                 {
                     (this->*handlers[data[i].type])(i);//CALL THE function handler based on type
+                    fd_poll[i].revents = 0;
                 }
                 catch (int status)
                 {
@@ -63,10 +64,10 @@ int servers::deploy()
                         fd_poll.erase(fd_poll.begin() + i);
                         delete data[i].response;
                         data.erase(data.begin() + i);
+                        std::cout << std::endl << std::endl << std::endl << std::endl;
                         i--;
                     }
                 }
-                fd_poll[i].revents = 0;
                 num_of_revents--;
             }
         }

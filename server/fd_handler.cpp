@@ -38,8 +38,7 @@ void servers::client_res_handler(int &index)
 {
     if (!((fd_poll[index].events & POLLOUT) && (fd_poll[index].revents & POLLOUT)) && !((fd_poll[index].events & POLLIN) && (fd_poll[index].revents & POLLIN)))
         return ;
-    data[index].response->generate_response();
-    
+    data[index].response->generate_response(&(fd_poll[index]));
 }
 
 void servers::listener_handler(int &index)
@@ -64,8 +63,4 @@ void servers::listener_handler(int &index)
         fd_poll.push_back(p);
         data.push_back(d);
     }
-}
-void servers::file_handler(int index)
-{
-
 }
