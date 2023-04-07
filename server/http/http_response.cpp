@@ -101,7 +101,7 @@ http_response::http_response(http_request &req,struct pollfd *fd,std::string &ho
     content_remaining = 0;
     void (http_response::*state_handlers[3])() = {&http_response::GET_check_state,&http_response::POST_check_state,&http_response::DELETE_check_state};
     conf = get_config(host,port,request.get_path(),req.get_header("HOST"));
-    /*for (int i = 0; i <  conf.methods.size(); i++) {
+    for (int i = 0; i <  conf.methods.size(); i++) {
         std::cout << "method: [" << conf.methods[i] << "]\n";
     }
         std::cout << "root: [" << conf.root << "]\n"; 
@@ -124,7 +124,7 @@ http_response::http_response(http_request &req,struct pollfd *fd,std::string &ho
 
     std::cerr <<"["<< host << "] [" + port + "] [" + request.get_path() + "] [" + req.get_header("HOST") + "]\n";
     std::cerr <<"THE '/' is added to the root end, do not add it again!\n";
-    std::cout << "------------------ " << conf.root <<  "----" << std::endl;*/
+    std::cout << "------------------ " << conf.root <<  "----" << std::endl;
     std::map<std::string,int> met_map;
     met_map["GET"] = GET;
     met_map["POST"] = POST;
@@ -140,6 +140,16 @@ http_response::http_response(http_request &req,struct pollfd *fd,std::string &ho
             throw NOT_ALLOWED;
         type = met_map[request.get_method()];
         (this->*state_handlers[type])();
+        if (type == CGI && request.get_method() == "GET")
+        {
+            std::string output = "/tmp/XXXXXX";
+            int fd = mkstemp(&output[0]);
+            if (fd == -1)
+                throw SERVER_ERROR;
+            cgi_data.output = output;
+            cgi_data.output_fd = fd;
+            state = EXECUTOR;
+        }
     }
     catch(int x)
     {
@@ -148,6 +158,7 @@ http_response::http_response(http_request &req,struct pollfd *fd,std::string &ho
             is_cgi = 0;
             type = CGI;
             client->events = POLLOUT;
+            state = EXECUTOR;
             return;
         }
         ERROR_handler(x);
@@ -171,6 +182,7 @@ void http_response::generate_response(pollfd *fd)
             is_cgi = 0;
             type = CGI;
             client->events = POLLOUT;
+            state = EXECUTOR;
             std::cout << "rah dkhl l CGI" << std::endl;
             return;
         }

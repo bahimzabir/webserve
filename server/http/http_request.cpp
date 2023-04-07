@@ -100,6 +100,13 @@ std::string http_request::get_header(const std::string &header)
     }
     return empty;
 }
+std::string http_request::get_headers()
+{
+    std::string head;
+    for (int i = 0;i < headers.size();i++)
+        head += headers[i].first + ": " + headers[i].second + "\n";
+    return head;
+}
 
 void http_request::parse_remaining(char *buffer,int len, int n_new_line)
 {
@@ -128,6 +135,13 @@ http_request::http_request(const http_request &obj)
     return;
 }
 
+void http_request::reset()
+{
+    state = REQUEST_HEADERS;
+    remaining_nl = 0;
+    remaining.clear();
+    headers.clear();
+}
 const std::string &http_request::get_method()
 {
     return http_header[0];

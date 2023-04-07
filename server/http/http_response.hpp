@@ -19,8 +19,9 @@
 #define NORMAL 5
 #define UPLOADED 6
 #define RESPONSE_ERROR 8
-
-
+#define EXECUTOR 9
+#define WAITER 10
+#define PARSER 11
 
 
 #define GET 0 
@@ -67,6 +68,8 @@ class cgii
 class http_response
 {
     http_request &request;
+
+
     std::string status[3];
     std::map<std::string,std::string> headers;
     std::map<std::string,std::string> content_type;
@@ -77,9 +80,10 @@ class http_response
     config_match conf;
     struct pollfd *client;
     int type;
+
+
     int state;
     bool is_cgi;
-    // cgi cgi_data;
 	t_cgi_data	cgi_data;
 
 
@@ -103,6 +107,9 @@ class http_response
 
 
     void CGI_handler();
+    void CGI_executer();
+    void CGI_WAITER();
+    void CGI_PARSER();
     int check_cgi(std::string &index);
 
 
@@ -110,6 +117,7 @@ class http_response
     void ERROR_handler(int x);
 
 
+    long long remaining_bytes();
     public:
         http_response(http_request &req,struct pollfd *fd,std::string &host,std::string &port);
         void generate_response(pollfd *fd);
@@ -118,3 +126,4 @@ class http_response
 
 std::string int_to_string(int a);
 std::string extention(std::string &file);
+int count_nl (char *str,int len);

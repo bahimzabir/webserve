@@ -23,16 +23,14 @@ void http_response::GET_check_state()
             for (int i = 0;i < conf.index.size();i++)
             {
                 std::ifstream f(conf.root + "/" + conf.index[i]);
-                std::cout << "------ ::::: " << conf.root + "/" + conf.index[i] << std::endl; 
                 if (f.good())
                 {
                     state = FILE;
-                    conf.root = conf.root +  "/" + conf.index[i];
+                    conf.root = conf.root + "/" + conf.index[i];
                     if (check_cgi(conf.index[i]))
                         type = CGI;
                     else
                         type = GET;
-                    std::cout << "   *-" << state << std::endl;
                     f.close();
                     return;
                 }
@@ -57,22 +55,13 @@ void http_response::GET_check_state()
     }
     else
         throw NOT_FOUND;
-    if (type == CGI)
-    {
-        std::string output = "/tmp/XXXXXX";
-        int fd = mkstemp(&output[0]);
-        if (fd == -1)
-            throw SERVER_ERROR;
-        cgi_data.output = output;
-        cgi_data.output_fd = fd;
-    }
 }
 
 
 void http_response::GET_open_input()
 {
     file.open(conf.root);
-    
+    std::cout << conf.root << std::endl;
     if (!file)
         throw FORBIDDEN;
     res_header += "HTTP/1.1 200 OK\n";
@@ -86,7 +75,6 @@ void http_response::GET_open_input()
     for (std::map<std::string,std::string>::iterator it = headers.begin(); it != headers.end(); it++)
         res_header +=  (*it).first + ":" + (*it).second + "\n";
     res_header += "\n";
-    std::cout << "bdat asaaaat+++" << std::endl;
     state = RESPONSE_BODY;
 }
 void http_response::GET_body()
@@ -99,9 +87,9 @@ void http_response::GET_body()
         body.append(buffer,file.gcount());
     }
     SEND_handler();
-    if (!file.good() && !file.eof())
+    if (!file.good() && !file.eof() && body == "" && res_header == "")
     {
-        std::cout << "error asat" << std::endl;
+        std::cout << "error hna" << std::endl;
         throw 666;
     }
 }
