@@ -121,8 +121,6 @@ void http_response::GET_list_directory()
 
 void http_response::GET_handler()
 {
-    std::cout << "dsad ----------- [" << conf.root << "]" << std::endl;
-    std::cout << state << std::endl;
     std::cout << "GET_H" << std::endl;
     if (state == FILE)
         GET_open_input();

@@ -9,8 +9,6 @@
 class error_pages_map : public std::map<int, std::string>
 {
 	private:
-		std::string 				def;
-        std::string 				msg_def;
 		std::map<int, std::string> error_pages;
         std::map<int, std::string> error_messages;
 	public:

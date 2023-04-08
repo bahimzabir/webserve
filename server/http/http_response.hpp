@@ -10,6 +10,8 @@
 #include <dirent.h>
 #include "error_pages_map.hpp"
 #include <poll.h>
+#include <cstdio>
+
 
 
 #define FILE 1
@@ -27,8 +29,8 @@
 #define GET 0 
 #define POST 1
 #define DELETE 2
-#define CGI 3
-#define SEND 4
+#define CGI 2
+#define SEND 3
 
 
 
@@ -40,6 +42,8 @@
 #define SERVER_ERROR 500
 #define FORBIDDEN 403
 #define NOT_FOUND 404
+#define NO_CONTENT 204
+#define BAD_GATEWAY 502
 
 struct t_cgi_data
 {
@@ -102,7 +106,6 @@ class http_response
     void POST_upload_chunked_handler();
     void POST_check_cgi();
 
-    void DELETE_handler();
     void DELETE_check_state();
 
 

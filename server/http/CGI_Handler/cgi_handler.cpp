@@ -49,9 +49,8 @@ void	http_response::CGI_executer() {
 		exit(1);
 	}
     else if (pid == -1)
-        throw 500;
+        throw SERVER_ERROR;
     cgi_data.pid = pid;
-    std::cout << "pid :: :: ::" << cgi_data.pid << std::endl;
     state = WAITER;
     free(env[0]);
 }
@@ -61,10 +60,7 @@ void	http_response::CGI_WAITER() {
     int status = -1;
     int ret = waitpid(cgi_data.pid,&status,WNOHANG);
     if (WEXITSTATUS(status) == 1)
-    {
-        std::cout << "HNA" << std::endl;
-        throw 500;
-    }
+        throw BAD_GATEWAY;
     if (ret != 0)
     {
         state = PARSER;
@@ -94,9 +90,8 @@ void	http_response::CGI_PARSER() {
     file.read(buffer,1000);
 
     buffer[file.gcount()] = 0;
-    std::cout << "      -" << file.tellg() << std::endl;
     request.parse_remaining(buffer,file.gcount(),count_nl(buffer,file.gcount()));
-    if (file.eof() || request.get_state() == REQUEST_BODY)
+    if (request.get_state() == REQUEST_BODY)
     {
         type = GET;
         state = RESPONSE_BODY;
@@ -121,12 +116,12 @@ void	http_response::CGI_PARSER() {
             content_remaining = std::atoi(request.get_header("CONTENT-LENGTH").c_str());
         }
         res_header += "\n";
-        std::cout << "\n\n" << res_header;
-        std::cout << content_remaining << std::endl;
         return;
     }
+    if (file.eof())
+        throw BAD_GATEWAY;
     if (!file.good())
-        throw 500;
+        throw SERVER_ERROR;
 }
 void	http_response::CGI_handler() {
     if (state == EXECUTOR)

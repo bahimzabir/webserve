@@ -139,6 +139,8 @@ http_response::http_response(http_request &req,struct pollfd *fd,std::string &ho
         if (conf.methods[0] != "ALL" && std::find(conf.methods.begin(),conf.methods.end(),request.get_method()) == conf.methods.end())
             throw NOT_ALLOWED;
         type = met_map[request.get_method()];
+        if (conf.return_value != "")
+            throw 301;
         (this->*state_handlers[type])();
         if (type == CGI && request.get_method() == "GET")
         {
@@ -169,7 +171,7 @@ http_response::http_response(http_request &req,struct pollfd *fd,std::string &ho
 void http_response::generate_response(pollfd *fd)
 {
     client = fd;
-    void (http_response::*handlers[5])() = {&http_response::GET_handler,&http_response::POST_handler,&http_response::DELETE_handler,&http_response::CGI_handler,&http_response::SEND_handler};
+    void (http_response::*handlers[4])() = {&http_response::GET_handler,&http_response::POST_handler,&http_response::CGI_handler,&http_response::SEND_handler};
     try
     {
         (this->*handlers[type])();
@@ -242,14 +244,17 @@ void http_response::ERROR_handler(int x)
     body += errors.get_error(x);
     content_remaining = body.size();
     headers["Content-Length"] = int_to_string(body.size());
+    std::cout << "excesss        = " << body  << std::endl;
     headers["Content-Type"] = content_type["html"];
+    if (x == 301)
+        headers["LOCATION"] = conf.return_value;
     res_header = "HTTP/1.1 " + int_to_string(x) + " " + errors.get_message(x) + "\n";
     for (std::map<std::string,std::string>::iterator it = headers.begin(); it != headers.end(); it++)
         res_header +=  (*it).first + ":" + (*it).second + "\n";
     res_header += '\n';
     std::cout << body.size() << " " << res_header.size() << std::endl;
     type = SEND;
-}                                          
+}
 
 int http_response::check_cgi(std::string &file)
 {
