@@ -60,6 +60,9 @@ void http_response::POST_upload_chunked_handler(void)
                 remove_white_spaces(body);
                 substring = body.substr(0,body.find('\n'));
                 content_remaining = strtoll(substring.c_str(),NULL,16);
+                conf.client_max_body_size -= content_remaining;
+                if (conf.client_max_body_size <= 0)
+                    throw ENTITY_LARGE;
                 if (errno == ERANGE)
                     throw BAD_REQUEST;
                 if (!content_remaining)
@@ -177,6 +180,8 @@ void http_response::POST_check_state()
     {
         content_remaining = strtoll(request.get_header("CONTENT-LENGTH").c_str(),NULL,10);
         state = NORMAL;
+        if (content_remaining > conf.client_max_body_size)
+            throw ENTITY_LARGE;
         if (content_remaining <= ret)
         {
             content_remaining = -1;
