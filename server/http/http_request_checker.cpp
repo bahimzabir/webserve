@@ -12,35 +12,31 @@
 
 #include "http_request.hpp"
 
-/*
-TO DO:
-the mandatory requirements for each HTTP request:
-
-ALL requests:
-	The request must contain a valid resource path in the form of an absolute or relative URL.
-	The request must contain a valid HTTP version, which must be HTTP/1.1.
-GET & DELETE requests:
-	The method must be GET || DELETE.
-POST request:
-	The method must be POST.
-	The request must include a valid Content-Length header specifying the length of the message body in bytes.
-	The request must include a Content-Type header specifying the type of data being sent.
-	The message body must contain the data being submitted to the server in the correct format specified by the Content-Type header.
-*/
-
-// bool http_request::isValidHttpRequest() {
+bool http_request::isValidHttpRequest() {
 	
-// 	bool hasResourcePath = false;
-//     bool hasHttpVersion = false;
-//     bool hasValidMethod = false;
-//     bool hasContentLength = false;
-//     bool hasContentType = false;
-//     bool hasMessageBody = false;
+	bool hasResourcePath = false;
+    bool hasHttpVersion = false;
+    bool hasContentLength = false;
+    bool hasContentType = false;
+    bool hasMessageBody = false;
 
-// 	if ((http_header[0] == "GET" || http_header[0] == "DELETE") && http_header[2] != "HTTP/1.1")
-// 		if (!http_header[2].empty() && http_header.)
-// 	int size = headers.size();
-// 	for (int i = 0; i < size; i++) {
-		
-// 	}
-// }
+
+	hasResourcePath = http_header[2] == "HTTP/1.1" ? true : false;
+	hasHttpVersion = !http_header[1].empty() ? true : false;
+	if ((http_header[0] == "GET" || http_header[0] == "DELETE"))
+			return hasResourcePath && hasHttpVersion;
+	else if (http_header[0] == "POST")
+	{
+		for(int i = 0; i < headers.size(); i++) {
+			if (headers[i].first == "CONTENT-TYPE")
+				hasContentType = true;
+			else if (headers[i].first == "TRANSFER-ENCODING" || headers[i].first == "CONTENT-LENGTH")
+				hasContentLength = true;
+			else if (headers[i].first == "MESSAGE-BODY")
+				hasMessageBody = true;
+		}
+		return hasResourcePath && hasHttpVersion && hasContentLength && hasContentType && hasMessageBody;
+	}
+	else
+		return false;
+}
