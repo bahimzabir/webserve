@@ -73,7 +73,7 @@ class cgii
 
 class http_response
 {
-    http_request &request;
+    http_request *request;
 
 
     std::string status[3];
@@ -124,9 +124,8 @@ class http_response
 
     long long remaining_bytes();
     public:
-        http_response(http_request &req,struct pollfd *fd,std::string &host,std::string &port);
-        void generate_response(pollfd *fd);
-
+        http_response(http_request *req,struct pollfd *fd,std::string &host,std::string &port);
+        void generate_response(pollfd *fd,http_request *req);
 };
 
 std::string int_to_string(int a);

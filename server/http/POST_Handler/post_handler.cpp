@@ -171,14 +171,14 @@ void http_response::POST_check_state()
     client->events = POLLIN;
     char buffer[5000];
     int ret = 0;
-    request.get_remaining().read(buffer,5000);
-    ret = request.get_remaining().gcount();
+    request->get_remaining().read(buffer,5000);
+    ret = request->get_remaining().gcount();
     state = CHUNKED;
-    if (request.get_header("TRANSFER-ENCODING") == "chunked")
+    if (request->get_header("TRANSFER-ENCODING") == "chunked")
         content_remaining = 0;
     else
     {
-        content_remaining = strtoll(request.get_header("CONTENT-LENGTH").c_str(),NULL,10);
+        content_remaining = strtoll(request->get_header("CONTENT-LENGTH").c_str(),NULL,10);
         state = NORMAL;
         if (content_remaining > conf.client_max_body_size)
             throw ENTITY_LARGE;
@@ -194,8 +194,8 @@ void http_response::POST_check_state()
     if (conf.upload_pass != "")
     {
         std::string name;
-        if (!is_cgi && request.get_header("FILE_NAME") != "")
-            name = conf.upload_pass + '/' + request.get_header("FILE_NAME");
+        if (!is_cgi && request->get_header("FILE_NAME") != "")
+            name = conf.upload_pass + '/' + request->get_header("FILE_NAME");
         else
             name = conf.upload_pass + "/XXXXXX";
         int fd = mkstemp(&name[0]);

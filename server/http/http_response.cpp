@@ -1,6 +1,6 @@
 #include "http_response.hpp"
 
-http_response::http_response(http_request &req,struct pollfd *fd,std::string &host,std::string &port) : request(req)
+http_response::http_response(http_request *req,struct pollfd *fd,std::string &host,std::string &port)
 {
     content_type["html"] =  "text/html";
     content_type["htm"] =  "text/html";
@@ -99,8 +99,9 @@ http_response::http_response(http_request &req,struct pollfd *fd,std::string &ho
     content_type["avi"] =  "video/x-msvideo";
 
     content_remaining = 0;
+    request = req;
     void (http_response::*state_handlers[3])() = {&http_response::GET_check_state,&http_response::POST_check_state,&http_response::DELETE_check_state};
-    conf = get_config(host,port,request.get_path(),req.get_header("HOST"));
+    conf = get_config(host,port,request->get_path(),request->get_header("HOST"));
     for (int i = 0; i <  conf.methods.size(); i++) {
         std::cout << "method: [" << conf.methods[i] << "]\n";
     }
@@ -122,7 +123,7 @@ http_response::http_response(http_request &req,struct pollfd *fd,std::string &ho
     std::cout << "ret_value: [" << conf.return_value << "]\n";
 
 
-    std::cerr <<"["<< host << "] [" + port + "] [" + request.get_path() + "] [" + req.get_header("HOST") + "]\n";
+    std::cerr <<"["<< host << "] [" + port + "] [" + request->get_path() + "] [" + request->get_header("HOST") + "]\n";
     std::cerr <<"THE '/' is added to the root end, do not add it again!\n";
     std::cout << "------------------ " << conf.root <<  "----" << std::endl;
     std::map<std::string,int> met_map;
@@ -134,15 +135,15 @@ http_response::http_response(http_request &req,struct pollfd *fd,std::string &ho
     is_cgi = 0;
     try
     {
-        if (met_map.find(request.get_method()) == met_map.end())
+        if (met_map.find(request->get_method()) == met_map.end())
             throw NOT_IMPLEMENTED;
-        if (conf.methods[0] != "ALL" && std::find(conf.methods.begin(),conf.methods.end(),request.get_method()) == conf.methods.end())
+        if (conf.methods[0] != "ALL" && std::find(conf.methods.begin(),conf.methods.end(),request->get_method()) == conf.methods.end())
             throw NOT_ALLOWED;
-        type = met_map[request.get_method()];
+        type = met_map[request->get_method()];
         if (conf.return_value != "")
             throw 301;
         (this->*state_handlers[type])();
-        if (type == CGI && request.get_method() == "GET")
+        if (type == CGI && request->get_method() == "GET")
         {
             std::string output = "/tmp/XXXXXX";
             int fd = mkstemp(&output[0]);
@@ -168,9 +169,10 @@ http_response::http_response(http_request &req,struct pollfd *fd,std::string &ho
 }
 
 
-void http_response::generate_response(pollfd *fd)
+void http_response::generate_response(pollfd *fd,http_request *req)
 {
     client = fd;
+    request = req;
     void (http_response::*handlers[4])() = {&http_response::GET_handler,&http_response::POST_handler,&http_response::CGI_handler,&http_response::SEND_handler};
     try
     {

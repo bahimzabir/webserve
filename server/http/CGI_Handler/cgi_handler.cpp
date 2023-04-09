@@ -33,7 +33,6 @@ void	http_response::CGI_executer() {
 	env[1] = NULL;
 	std::cout << env[i++] << std::endl;
 	free(pwd);
-	// fd = open(cgi_data.input, O_WRONLY | O_TRUNC | O_CREAT, 0644);
 	fd = cgi_data.input_fd;
 	int out_fd = cgi_data.output_fd;
 	pid = fork();
@@ -70,7 +69,7 @@ void	http_response::CGI_WAITER() {
         file.open(cgi_data.output);
         if (!file.good())
             throw 500;
-        request.reset();
+        request->reset();
     }
 }
 
@@ -90,30 +89,30 @@ void	http_response::CGI_PARSER() {
     file.read(buffer,1000);
 
     buffer[file.gcount()] = 0;
-    request.parse_remaining(buffer,file.gcount(),count_nl(buffer,file.gcount()));
-    if (request.get_state() == REQUEST_BODY)
+    request->parse_remaining(buffer,file.gcount(),count_nl(buffer,file.gcount()));
+    if (request->get_state() == REQUEST_BODY)
     {
         type = GET;
         state = RESPONSE_BODY;
-        if (request.get_header("STATUS") != "")
-            res_header += "HTTP/1.1 " + request.get_header("STATUS") + " " + m.get_message(std::atoi(request.get_header("STATUS").c_str())) + "\n";
-        else if (request.get_header("LOCATION") != "")
+        if (request->get_header("STATUS") != "")
+            res_header += "HTTP/1.1 " + request->get_header("STATUS") + " " + m.get_message(std::atoi(request->get_header("STATUS").c_str())) + "\n";
+        else if (request->get_header("LOCATION") != "")
             res_header += "HTTP/1.1 301 Moved Permanently\n";
         else
             res_header += "HTTP/1.1 200 OK\n";
-        res_header += request.get_headers();
-        request.get_remaining().read(buffer,4000);
-        if (request.get_state() == REQUEST_BODY)
-            body.append(buffer,request.get_remaining().gcount());
-        if (request.get_header("CONTENT-LENGTH") == "")
+        res_header += request->get_headers();
+        request->get_remaining().read(buffer,4000);
+        if (request->get_state() == REQUEST_BODY)
+            body.append(buffer,request->get_remaining().gcount());
+        if (request->get_header("CONTENT-LENGTH") == "")
         {
             res_header += "Content-length: " + int_to_string(remaining_bytes() + body.size()) + "\n";
             content_remaining = remaining_bytes() + body.size();
         }
         else
         {
-            res_header += "Content-length: " + request.get_header("CONTENT-LENGTH") + "\n";
-            content_remaining = std::atoi(request.get_header("CONTENT-LENGTH").c_str());
+            res_header += "Content-length: " + request->get_header("CONTENT-LENGTH") + "\n";
+            content_remaining = std::atoi(request->get_header("CONTENT-LENGTH").c_str());
         }
         res_header += "\n";
         return;

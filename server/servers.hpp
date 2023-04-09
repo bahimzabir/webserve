@@ -34,6 +34,7 @@ class servers
         void client_res_handler(int &index);
         void listener_handler(int &index);
         void file_handler(int index);
+        void delete_client(int index);
         int deploy();
 };
 

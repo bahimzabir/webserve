@@ -20,5 +20,4 @@ class _socket
     public:
         _socket(const std::string &host,const std::string &port);
         int get_socket_fd();
-        struct addrinfo *get_info();
 };

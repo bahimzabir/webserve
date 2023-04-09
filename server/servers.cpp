@@ -17,10 +17,10 @@ servers::servers()
                 d.host = config_info[i].host;
                 d.port = config_info[i].ports[port_index];
                 d.response = NULL;
-                data.push_back(d);
                 p.fd = sockets[index].get_socket_fd();
                 p.events = POLLIN;
                 p.revents = 0;
+                data.push_back(d);
                 fd_poll.push_back(p);
                 index++;
             }
@@ -28,6 +28,11 @@ servers::servers()
             {
                 if (x >= 0)
                     close(x);
+            }
+            catch(std::exception &exception)
+            {
+                std::cout << exception.what() << std::endl;
+                exit(1);
             }
         }
     }
@@ -37,16 +42,25 @@ servers::servers()
         exit(0);
     }
 }
+void servers::delete_client(int index)
+{
+    close(fd_poll[index].fd);
+    fd_poll.erase(fd_poll.begin() + index);
+    delete data[index].response;
+    data.erase(data.begin() + index);
+}
 int servers::deploy()
 {
     void (servers::*handlers[4])(int &) = {&servers::listener_handler,&servers::client_req_handler,&servers::client_res_handler};
     int num_of_revents;
-
+    signal(SIGPIPE, SIG_IGN);
     while (1)
     {
+        
         num_of_revents = poll(&(fd_poll[0]),fd_poll.size(),-1);//wait for events
         for (int i = 0;i < fd_poll.size();i++)
         {
+            std::cout << data.size() << "-------------" << fd_poll.size() << std::endl;
             if (num_of_revents <= 0)
                 break;
             if (fd_poll[i].revents & POLLBOTH)
@@ -60,11 +74,18 @@ int servers::deploy()
                 {
                     if (status == END)
                     {
-                        close(fd_poll[i].fd);
-                        fd_poll.erase(fd_poll.begin() + i);
-                        delete data[i].response;
-                        data.erase(data.begin() + i);
+                        delete_client(i);
                         std::cout << std::endl << std::endl << std::endl << std::endl;
+                        i--;
+                    }
+                }
+                catch (std::exception &Exception)
+                {
+                    if (data[i].type == LISTENER && data.size() != fd_poll.size())
+                        fd_poll.erase(fd_poll.end() - 1);
+                    if (data[i].type == REQUEST)
+                    {
+                        delete_client(i);
                         i--;
                     }
                 }
