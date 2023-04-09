@@ -124,6 +124,7 @@ void	http_response::CGI_PARSER() {
         throw SERVER_ERROR;
 }
 void	http_response::CGI_handler() {
+    is_cgi = 1;
     if (state == EXECUTOR)
         CGI_executer();
     else if (state == WAITER)

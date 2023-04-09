@@ -45,6 +45,7 @@
 #define NO_CONTENT 204
 #define BAD_GATEWAY 502
 #define ENTITY_LARGE 413
+#define _CONFLICT 409
 
 struct t_cgi_data
 {

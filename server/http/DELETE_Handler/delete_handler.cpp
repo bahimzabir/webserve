@@ -1,5 +1,7 @@
 #include "../http_response.hpp"
 
+
+
 void http_response::DELETE_check_state()
 {
     client->events = POLLOUT;
@@ -19,17 +21,8 @@ void http_response::DELETE_check_state()
             while (d)
             {
                 std::string path = d->d_name;
-                if (path != "." && path != ".." && access((conf.root + "/" + path).c_str(),W_OK))
-                    throw FORBIDDEN;
-                d = readdir(directory);
-            }
-            rewinddir(directory);
-            d = readdir(directory);
-            while (d)
-            {
-                std::string path = d->d_name;
-                if (path != "." && path != ".." && remove((conf.root + "/" + path).c_str()))
-                    throw SERVER_ERROR;
+                if (path != "." && path != "..")
+                    throw _CONFLICT;
                 d = readdir(directory);
             }
             if (rmdir(conf.root.c_str()))
