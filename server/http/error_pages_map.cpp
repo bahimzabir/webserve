@@ -13,6 +13,7 @@ error_pages_map::error_pages_map(void) {
    error_pages.insert(std::make_pair<int, std::string>(301, ""));
    error_pages.insert(std::make_pair<int, std::string>(413, "<html><body><h1>Request Entity Too Large</h1></body></html>"));
    error_pages.insert(std::make_pair<int, std::string>(409, "<html><body><h1>Conflict</h1></body></html>"));
+   error_pages.insert(std::make_pair<int, std::string>(502, "<html><body><h1>Bad Gateway</h1></body></html>"));
 
    error_messages.insert(std::make_pair<int, std::string>(400, "Bad Request"));
    error_messages.insert(std::make_pair<int, std::string>(401, "Unauthorized"));
@@ -26,6 +27,7 @@ error_pages_map::error_pages_map(void) {
    error_messages.insert(std::make_pair<int, std::string>(301, "Moved Permanently"));
    error_messages.insert(std::make_pair<int, std::string>(413, "Request Entity Too Large"));
    error_messages.insert(std::make_pair<int, std::string>(409, "Conflict"));
+   error_messages.insert(std::make_pair<int, std::string>(502, "Bad Gateway"));
 }
 
 std::string& error_pages_map::get_error(int error_code) {

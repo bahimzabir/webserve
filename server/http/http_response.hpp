@@ -131,3 +131,4 @@ class http_response
 std::string int_to_string(int a);
 std::string extention(std::string &file);
 int count_nl (char *str,int len);
+size_t getSize(std::string filename);

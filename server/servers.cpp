@@ -73,20 +73,17 @@ int servers::deploy()
                 catch (int status)
                 {
                     if (status == END)
-                    {
-                        delete_client(i);
-                        std::cout << std::endl << std::endl << std::endl << std::endl;
-                        i--;
-                    }
+                        delete_client(i--);
                 }
                 catch (std::exception &Exception)
                 {
                     if (data[i].type == LISTENER && data.size() != fd_poll.size())
                         fd_poll.erase(fd_poll.end() - 1);
                     if (data[i].type == REQUEST)
+                        delete_client(i--);
+                    else if (data[i].type == RESPONSE)
                     {
-                        delete_client(i);
-                        i--;
+                        
                     }
                 }
                 num_of_revents--;

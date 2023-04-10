@@ -1,37 +1,26 @@
 #include "../http_response.hpp"
 
-std::string cgii::getScript(const std::string &uri) {
-	std::string script;
-	std::string::size_type pos = uri.find('?');
-	if (pos != std::string::npos)
-		script = uri.substr(0, pos);
-	else
-		script = uri;
-	return script;
-}
-
-std::string cgii::getQueries(const std::string &uri) {
-	std::string queries;
-	std::string::size_type pos = uri.find('?');
-	if (pos != std::string::npos)
-		queries = uri.substr(pos + 1);
-	return queries;
-}
-
-
-
 void	http_response::CGI_executer() {
 	int i = 0;
 	int status, pid, fd;
 	int p[2];
 	char *args[3];
-	char *env[2];
+	char *env[10];
 
 	char *pwd = getcwd(NULL, 0);
 	std::string pathInfo = std::string(pwd);
+    int len = 0;
+    if (request->get_header("TRANSFER-ENCODING") == "chunked")
+        len = getSize(cgi_data.input);
+    else
+        len = std::atoi(request->get_header("CONTENT-LENGTH").c_str());
 	env[0] = strdup(("PATH_INFO=" + pathInfo).c_str());
-	env[1] = NULL;
-	std::cout << env[i++] << std::endl;
+    env[1] = strdup(("CONTENT_TYPE=" + request->get_header("CONTENT-TYPE")).c_str());
+    //env[2] = strdup(("REQUEST_METHOD=" + request->get_method()).c_str());
+    env[2] = strdup(("CONTENT_LENGTH=" + int_to_string(len)).c_str());
+    env[3] = strdup("REDIRECT_STATUS=/Users/hait-moh/Desktop/webserv/webserve/in.html");
+	env[4] = NULL;
+    std::cout << strdup(conf.cgi_pass[0].cgi_param.c_str()) << std::endl;
 	free(pwd);
 	fd = cgi_data.input_fd;
 	int out_fd = cgi_data.output_fd;
@@ -68,7 +57,10 @@ void	http_response::CGI_WAITER() {
         close(cgi_data.output_fd);
         file.open(cgi_data.output);
         if (!file.good())
-            throw 500;
+        {
+            std::cout << "---------" << cgi_data.output <<std::endl;
+            throw SERVER_ERROR;
+        }
         request->reset();
     }
 }
@@ -95,15 +87,14 @@ void	http_response::CGI_PARSER() {
         type = GET;
         state = RESPONSE_BODY;
         if (request->get_header("STATUS") != "")
-            res_header += "HTTP/1.1 " + request->get_header("STATUS") + " " + m.get_message(std::atoi(request->get_header("STATUS").c_str())) + "\n";
+            res_header += "HTTP/1.1 " + request->get_header("STATUS") + "\n";
         else if (request->get_header("LOCATION") != "")
             res_header += "HTTP/1.1 301 Moved Permanently\n";
         else
             res_header += "HTTP/1.1 200 OK\n";
         res_header += request->get_headers();
         request->get_remaining().read(buffer,4000);
-        if (request->get_state() == REQUEST_BODY)
-            body.append(buffer,request->get_remaining().gcount());
+        body.append(buffer,request->get_remaining().gcount());
         if (request->get_header("CONTENT-LENGTH") == "")
         {
             res_header += "Content-length: " + int_to_string(remaining_bytes() + body.size()) + "\n";

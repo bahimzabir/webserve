@@ -146,11 +146,11 @@ http_response::http_response(http_request *req,struct pollfd *fd,std::string &ho
         if (type == CGI && request->get_method() == "GET")
         {
             std::string output = "/tmp/XXXXXX";
-            int fd = mkstemp(&output[0]);
-            if (fd == -1)
+            int ot_fd = mkstemp(&output[0]);
+            if (ot_fd == -1)
                 throw SERVER_ERROR;
             cgi_data.output = output;
-            cgi_data.output_fd = fd;
+            cgi_data.output_fd = ot_fd;
             state = EXECUTOR;
         }
     }
@@ -158,10 +158,11 @@ http_response::http_response(http_request *req,struct pollfd *fd,std::string &ho
     {
         if (x == CREATED && is_cgi)
         {
-            is_cgi = 0;
             type = CGI;
             client->events = POLLOUT;
             state = EXECUTOR;
+            file.clear();
+            file.close();
             return;
         }
         ERROR_handler(x);
@@ -183,11 +184,11 @@ void http_response::generate_response(pollfd *fd,http_request *req)
         std::cout << "ERROR   " << x << std::endl;
         if (x == CREATED && is_cgi)
         {
-            is_cgi = 0;
             type = CGI;
             client->events = POLLOUT;
             state = EXECUTOR;
-            std::cout << "rah dkhl l CGI" << std::endl;
+            file.clear();
+            file.close();
             return;
         }
         ERROR_handler(x);

@@ -206,17 +206,17 @@ void http_response::POST_check_state()
         {
             cgi_data.input_fd = fd;
             std::string output = conf.upload_pass + "/XXXXXX";
-            int fd = mkstemp(&output[0]);
-            if (fd == -1)
+            int ot_fd = mkstemp(&output[0]);
+            if (ot_fd == -1)
                 throw SERVER_ERROR;
             cgi_data.output = output;
-            cgi_data.output_fd = fd;
+            cgi_data.output_fd = ot_fd;
         }
         else
             close(fd);
         file.open(name);
         if (!file.good())
-            throw 403;
+            throw FORBIDDEN;
         body.append(buffer,ret);
         std::cout << body << std::endl;
         client->revents = 0;
