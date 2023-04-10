@@ -18,7 +18,7 @@ NAME2		=	match
 
 FLAGS		=	#-Wall -Werror -Wextra
 
-CPPFLAGS	=	-std=c++98 -fsanitize=address -g3
+CPPFLAGS	=	-std=c++98 #-fsanitize=address -g3
 
 SRCS		=	./parcing/parcer.cpp							\
 				./server/http/CGI_Handler/cgi_handler.cpp		\
@@ -31,21 +31,21 @@ SRCS		=	./parcing/parcer.cpp							\
 				./server/http/http_request.cpp					\
 				./server/http/http_response.cpp					\
 				./server/fd_handler.cpp							\
-				./server/main.cpp								\
+				./main.cpp								\
 				./server/server_init.cpp						\
 				./server/servers.cpp							\
 				./server/socket.cpp
 
 SRCS2		=	./server/http/config_matcher.cpp	\
 				./parcing/parcer.cpp				\
-				./server/main.cpp					\
+				./main.cpp					\
 				./server/server_init.cpp
 
 OBJS		=	${SRCS:.cpp=.o}
 
-# all			:	${NAME}
+all			:	${NAME}
 
-webserve	:	${SRCS}
+${NAME}		:	${SRCS}
 				c++ ${FLAGS} ${CPPFLAGS} ${SRCS} -o ${NAME}
 
 match		:	${SRCS2}

@@ -1,5 +1,5 @@
-#include "http/config_matcher.hpp"
-#include "servers.hpp"
+#include "server/http/config_matcher.hpp"
+#include "server/servers.hpp"
 
 int main()
 {
