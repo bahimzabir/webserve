@@ -14,8 +14,11 @@ std::vector<std::string> pathToVec(std::string& path) {
 			tmp += path[i];
 			i++;
 		}
-		if (tmp != "")
+		if (tmp != "") {
+			if (tmp == "..")
+				throw 404;
 			vpath.push_back(tmp);
+		}
 		tmp = "";
 	}
 	return vpath;

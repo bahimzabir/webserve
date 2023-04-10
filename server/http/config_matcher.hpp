@@ -14,6 +14,10 @@ struct config_match
     long				    	client_max_body_size;
 	std::map<int, std::string>	err_pages;
     std::string                 return_value;
+
+    ~config_match() {
+        delete this;
+    };
 };
 
 //Note: you have to free the config_match returned after using it
