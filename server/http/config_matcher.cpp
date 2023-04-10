@@ -16,7 +16,11 @@ std::vector<std::string> pathToVec(std::string& path) {
 		}
 		if (tmp != "") {
 			if (tmp == "..")
-				throw 404;
+			{
+				std::cerr << "throw\n";
+				throw 403;
+
+			}
 			vpath.push_back(tmp);
 		}
 		tmp = "";
@@ -24,9 +28,7 @@ std::vector<std::string> pathToVec(std::string& path) {
 	return vpath;
 }
 
-config_match& config_struct_fill(route& rout, long cmbs, std::map<int, std::string>& error_p, std::string newRoot) {
-
-	config_match *conf = new config_match();
+config_match& config_struct_fill(route& rout, long cmbs, std::map<int, std::string>& error_p, std::string newRoot, config_match *conf) {
 
 	conf->methods = rout.methods;
 	conf->client_max_body_size = cmbs;
@@ -105,7 +107,7 @@ TODO:
 				/
 */
 
-config_match& get_config(std::string host, std::string port, std::string rout, std::string server_name) {
+config_match& get_config(std::string host, std::string port, std::string rout, std::string server_name, config_match *conf) {
 
 	config* match_lvl1 = NULL;
 	config* match_lvl2 = NULL;
@@ -134,10 +136,10 @@ config_match& get_config(std::string host, std::string port, std::string rout, s
 	}
 
 	if(match_lvl2)
-		return (config_struct_fill(rt, match_lvl2->client_max_body_size, match_lvl2->error_pages, rout2));
+		return (config_struct_fill(rt, match_lvl2->client_max_body_size, match_lvl2->error_pages, rout2, conf));
 	else if(match_lvl1) {
-		return (config_struct_fill(rt, match_lvl1->client_max_body_size, match_lvl1->error_pages, rout2));
+		return (config_struct_fill(rt, match_lvl1->client_max_body_size, match_lvl1->error_pages, rout2, conf));
 	}
 	else
-		return (config_struct_fill(*match_lvl3->routes.begin(), match_lvl3->client_max_body_size, match_lvl3->error_pages, rout2));
+		return (config_struct_fill(*match_lvl3->routes.begin(), match_lvl3->client_max_body_size, match_lvl3->error_pages, rout2, conf));
 }

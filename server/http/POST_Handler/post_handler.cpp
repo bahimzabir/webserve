@@ -60,8 +60,8 @@ void http_response::POST_upload_chunked_handler(void)
                 remove_white_spaces(body);
                 substring = body.substr(0,body.find('\n'));
                 content_remaining = strtoll(substring.c_str(),NULL,16);
-                conf->client_max_body_size -= content_remaining;
-                if (conf->client_max_body_size <= 0)
+                conf.client_max_body_size -= content_remaining;
+                if (conf.client_max_body_size <= 0)
                     throw ENTITY_LARGE;
                 if (errno == ERANGE)
                     throw BAD_REQUEST;
@@ -123,20 +123,20 @@ void http_response::POST_upload_normal_handler(void)
 void http_response::POST_check_cgi()
 {
     struct stat s;
-    if (stat(conf->root.c_str(),&s) == 0)
+    if (stat(conf.root.c_str(),&s) == 0)
     {
         if (S_ISDIR(s.st_mode))
         {
-            for (int i = 0;i < conf->index.size();i++)
+            for (int i = 0;i < conf.index.size();i++)
             {
-                if (check_cgi(conf->index[i]))
+                if (check_cgi(conf.index[i]))
                 {
-                    std::ifstream f(conf->root + "/" + conf->index[i]);
+                    std::ifstream f(conf.root + "/" + conf.index[i]);
                     if (f.good())
                     {
                         is_cgi = 1;
-                        conf->upload_pass = "/tmp";
-                        conf->root = conf->root + "/" + conf->index[i];
+                        conf.upload_pass = "/tmp";
+                        conf.root = conf.root + "/" + conf.index[i];
                         f.close();
                         return;
                     }
@@ -147,13 +147,13 @@ void http_response::POST_check_cgi()
         }
         else
         {
-            if (check_cgi(conf->root))
+            if (check_cgi(conf.root))
             {
-                std::ifstream f(conf->root);
+                std::ifstream f(conf.root);
                 if (f.good())
                 {
                     is_cgi = 1;
-                    conf->upload_pass = "/tmp";
+                    conf.upload_pass = "/tmp";
                     f.close();
                     return;
                 }
@@ -180,7 +180,7 @@ void http_response::POST_check_state()
     {
         content_remaining = strtoll(request->get_header("CONTENT-LENGTH").c_str(),NULL,10);
         state = NORMAL;
-        if (content_remaining > conf->client_max_body_size)
+        if (content_remaining > conf.client_max_body_size)
             throw ENTITY_LARGE;
         if (content_remaining <= ret)
         {
@@ -189,15 +189,15 @@ void http_response::POST_check_state()
         }
     }
     
-	if (conf->upload_pass == "")
+	if (conf.upload_pass == "")
         POST_check_cgi();
-    if (conf->upload_pass != "")
+    if (conf.upload_pass != "")
     {
         std::string name;
         if (!is_cgi && request->get_header("FILE_NAME") != "")
-            name = conf->upload_pass + '/' + request->get_header("FILE_NAME");
+            name = conf.upload_pass + '/' + request->get_header("FILE_NAME");
         else
-            name = conf->upload_pass + "/XXXXXX";
+            name = conf.upload_pass + "/XXXXXX";
         int fd = mkstemp(&name[0]);
         if (fd == -1)
             throw SERVER_ERROR;
@@ -205,7 +205,7 @@ void http_response::POST_check_state()
         if (is_cgi)
         {
             cgi_data.input_fd = fd;
-            std::string output = conf->upload_pass + "/XXXXXX";
+            std::string output = conf.upload_pass + "/XXXXXX";
             int ot_fd = mkstemp(&output[0]);
             if (ot_fd == -1)
                 throw SERVER_ERROR;

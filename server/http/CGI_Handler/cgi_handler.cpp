@@ -21,7 +21,7 @@ void	http_response::CGI_executer() {
     
     env[1] = strdup(("REQUEST_METHOD=" + request->get_method()).c_str());
     env[2] = strdup(("CONTENT_LENGTH=" + int_to_string(len)).c_str());
-    env[3] = strdup(("SCRIPT_FILENAME=" + conf->root).c_str());
+    env[3] = strdup(("SCRIPT_FILENAME=" + conf.root).c_str());
     env[4] = strdup("REDIRECT_STATUS=200");
 	env[5] = NULL;
 	free(pwd);
@@ -33,8 +33,8 @@ void	http_response::CGI_executer() {
 		    dup2(fd, 0);
 		dup2(out_fd, 1);
 		close(fd);
-		args[0] = strdup(conf->cgi_pass[0].cgi_param.c_str());
-		args[1] = strdup(conf->root.c_str());
+		args[0] = strdup(conf.cgi_pass[0].cgi_param.c_str());
+		args[1] = strdup(conf.root.c_str());
 		args[2] = NULL;
 		execve(args[0], args, env);
 		exit(1);

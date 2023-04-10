@@ -6,15 +6,15 @@ void http_response::DELETE_check_state()
 {
     client->events = POLLOUT;
     struct stat s;
-    if (stat(conf->root.c_str(),&s) == 0)
+    if (stat(conf.root.c_str(),&s) == 0)
     {
         if (S_ISDIR(s.st_mode))
         {
-            if (access(conf->root.c_str(),W_OK))
+            if (access(conf.root.c_str(),W_OK))
                 throw FORBIDDEN;
             DIR *directory;
             struct dirent *d;
-            directory = opendir(conf->root.c_str());
+            directory = opendir(conf.root.c_str());
             if (!directory)
                 throw FORBIDDEN;
             d = readdir(directory);
@@ -25,15 +25,15 @@ void http_response::DELETE_check_state()
                     throw _CONFLICT;
                 d = readdir(directory);
             }
-            if (rmdir(conf->root.c_str()))
+            if (rmdir(conf.root.c_str()))
                 throw SERVER_ERROR;
             throw NO_CONTENT;
         }
         else
         {
-            if (access((conf->root).c_str(),W_OK))
+            if (access((conf.root).c_str(),W_OK))
                 throw FORBIDDEN;
-            if (remove(conf->root.c_str()))
+            if (remove(conf.root.c_str()))
                 throw SERVER_ERROR;
             throw NO_CONTENT;
         }

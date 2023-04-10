@@ -83,7 +83,7 @@ class http_response
     long long content_remaining;
     std::string body;
     std::fstream file;
-    config_match *conf;
+    config_match conf;
     struct pollfd *client;
     int type;
 

@@ -18,7 +18,7 @@ NAME2		=	match
 
 FLAGS		=	#-Wall -Werror -Wextra
 
-CPPFLAGS	=	-std=c++98 #-fsanitize=address -g3
+CPPFLAGS	=	-std=c++98 -fsanitize=address -g3
 
 SRCS		=	./parcing/parcer.cpp							\
 				./server/http/CGI_Handler/cgi_handler.cpp		\
