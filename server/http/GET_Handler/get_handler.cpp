@@ -15,19 +15,19 @@ void http_response::GET_check_state()
 {
     client->events = POLLOUT;
     struct stat s;
-    std::cout << conf.root << std::endl;
-    if (stat(conf.root.c_str(),&s) == 0)
+    std::cout << conf->root << std::endl;
+    if (stat(conf->root.c_str(),&s) == 0)
     {
         if (S_ISDIR(s.st_mode))
         {
-            for (int i = 0;i < conf.index.size();i++)
+            for (int i = 0;i < conf->index.size();i++)
             {
-                std::ifstream f(conf.root + "/" + conf.index[i]);
+                std::ifstream f(conf->root + "/" + conf->index[i]);
                 if (f.good())
                 {
                     state = FILE;
-                    conf.root = conf.root + "/" + conf.index[i];
-                    if (check_cgi(conf.index[i]))
+                    conf->root = conf->root + "/" + conf->index[i];
+                    if (check_cgi(conf->index[i]))
                         type = CGI;
                     else
                         type = GET;
@@ -37,14 +37,14 @@ void http_response::GET_check_state()
                 else if (f.is_open())
                     f.close();
             }
-            if (conf.autoindex)
+            if (conf->autoindex)
                 state = LIST_DIRECTORY;
             else
                 throw FORBIDDEN;
         }
         else
         {
-            if (check_cgi(conf.root))
+            if (check_cgi(conf->root))
                 type = CGI;
             else
             {
@@ -60,15 +60,15 @@ void http_response::GET_check_state()
 
 void http_response::GET_open_input()
 {
-    file.open(conf.root);
-    std::cout << conf.root << std::endl;
+    file.open(conf->root);
+    std::cout << conf->root << std::endl;
     if (!file)
         throw FORBIDDEN;
     res_header += "HTTP/1.1 200 OK\n";
-    content_remaining = getSize(conf.root);
+    content_remaining = getSize(conf->root);
     headers["Content-Length"] = int_to_string(content_remaining);
-    std::string ext = (conf.root).substr(conf.root.find_last_of(".") + 1);
-    if (ext != conf.root && content_type.count(ext))
+    std::string ext = (conf->root).substr(conf->root.find_last_of(".") + 1);
+    if (ext != conf->root && content_type.count(ext))
         headers["Content-Type"] = content_type[ext];
     else
         headers["Content-Type"] = "application/octet-stream";
@@ -99,7 +99,7 @@ void http_response::GET_list_directory()
 {
     DIR *directory;
     struct dirent *d;
-    directory = opendir(conf.root.c_str());
+    directory = opendir(conf->root.c_str());
     if (!directory)
         throw FORBIDDEN;
     d = readdir(directory);

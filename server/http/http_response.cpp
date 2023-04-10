@@ -101,31 +101,31 @@ http_response::http_response(http_request *req,struct pollfd *fd,std::string &ho
     content_remaining = 0;
     request = req;
     void (http_response::*state_handlers[3])() = {&http_response::GET_check_state,&http_response::POST_check_state,&http_response::DELETE_check_state};
-    conf = get_config(host,port,request->get_path(),request->get_header("HOST"));
-    for (int i = 0; i <  conf.methods.size(); i++) {
-        std::cout << "method: [" << conf.methods[i] << "]\n";
+    conf = &get_config(host,port,request->get_path(),request->get_header("HOST"));
+    for (int i = 0; i <  conf->methods.size(); i++) {
+        std::cout << "method: [" << conf->methods[i] << "]\n";
     }
-        std::cout << "root: [" << conf.root << "]\n"; 
-    for (int i = 0; i <  conf.index.size(); i++) {
-        std::cout << "index: [" << conf.index[i] << "]\n";
+        std::cout << "root: [" << conf->root << "]\n"; 
+    for (int i = 0; i <  conf->index.size(); i++) {
+        std::cout << "index: [" << conf->index[i] << "]\n";
     }
-    std::cout << "autoindex: [" << conf.autoindex << "]\n";
-    std::cout << "upload_pass: [" << conf.upload_pass << "]\n";
-    for (int i = 0; i <  conf.cgi_pass.size(); i++) {
-        std::cout << "cgi_param: [" << conf.cgi_pass[i].cgi_param << "]\n";
-        std::cout << "cgi_pass: [" << conf.cgi_pass[i].cgi_pass << "]\n";
+    std::cout << "autoindex: [" << conf->autoindex << "]\n";
+    std::cout << "upload_pass: [" << conf->upload_pass << "]\n";
+    for (int i = 0; i <  conf->cgi_pass.size(); i++) {
+        std::cout << "cgi_param: [" << conf->cgi_pass[i].cgi_param << "]\n";
+        std::cout << "cgi_pass: [" << conf->cgi_pass[i].cgi_pass << "]\n";
     }
-    std::cout << "mcbs: [" << conf.client_max_body_size << "]\n";
-    for (std::map<int, std::string>::iterator it = conf.err_pages.begin(); it != conf.err_pages.end(); it++)
+    std::cout << "mcbs: [" << conf->client_max_body_size << "]\n";
+    for (std::map<int, std::string>::iterator it = conf->err_pages.begin(); it != conf->err_pages.end(); it++)
     {
         std::cout << "err_page: [" << it->first << "-" << it->second << "]\n";
     }
-    std::cout << "ret_value: [" << conf.return_value << "]\n";
+    std::cout << "ret_value: [" << conf->return_value << "]\n";
 
 
     std::cerr <<"["<< host << "] [" + port + "] [" + request->get_path() + "] [" + request->get_header("HOST") + "]\n";
     std::cerr <<"THE '/' is added to the root end, do not add it again!\n";
-    std::cout << "------------------ " << conf.root <<  "----" << std::endl;
+    std::cout << "------------------ " << conf->root <<  "----" << std::endl;
     std::map<std::string,int> met_map;
     met_map["GET"] = GET;
     met_map["POST"] = POST;
@@ -137,10 +137,10 @@ http_response::http_response(http_request *req,struct pollfd *fd,std::string &ho
     {
         if (met_map.find(request->get_method()) == met_map.end())
             throw NOT_IMPLEMENTED;
-        if (conf.methods[0] != "ALL" && std::find(conf.methods.begin(),conf.methods.end(),request->get_method()) == conf.methods.end())
+        if (conf->methods[0] != "ALL" && std::find(conf->methods.begin(),conf->methods.end(),request->get_method()) == conf->methods.end())
             throw NOT_ALLOWED;
         type = met_map[request->get_method()];
-        if (conf.return_value != "")
+        if (conf->return_value != "")
             throw 301;
         (this->*state_handlers[type])();
         if (type == CGI && request->get_method() == "GET")
@@ -227,13 +227,13 @@ void http_response::ERROR_handler(int x)
     client->events = POLLOUT;
     if (x == END)
         throw x;
-    if (conf.err_pages[x] != "")
+    if (conf->err_pages[x] != "")
     {
-        file.open(conf.err_pages[x]);
+        file.open(conf->err_pages[x]);
         if (file.good())
         {
-            conf.root = conf.err_pages[x];
-            conf.err_pages[x] = "";
+            conf->root = conf->err_pages[x];
+            conf->err_pages[x] = "";
             type = GET;
             state = FILE;
             file.close();
@@ -241,7 +241,7 @@ void http_response::ERROR_handler(int x)
         }
         else if (file.is_open())
             file.close();
-        conf.err_pages[x] = "";
+        conf->err_pages[x] = "";
     }
     error_pages_map errors;
     body += errors.get_error(x);
@@ -250,7 +250,7 @@ void http_response::ERROR_handler(int x)
     std::cout << "excesss        = " << body  << std::endl;
     headers["Content-Type"] = content_type["html"];
     if (x == 301)
-        headers["LOCATION"] = conf.return_value;
+        headers["LOCATION"] = conf->return_value;
     res_header = "HTTP/1.1 " + int_to_string(x) + " " + errors.get_message(x) + "\n";
     for (std::map<std::string,std::string>::iterator it = headers.begin(); it != headers.end(); it++)
         res_header +=  (*it).first + ":" + (*it).second + "\n";
@@ -261,9 +261,9 @@ void http_response::ERROR_handler(int x)
 
 int http_response::check_cgi(std::string &file)
 {
-    for (int c = 0; c < conf.cgi_pass.size();c++)
+    for (int c = 0; c < conf->cgi_pass.size();c++)
     {  
-        if (extention(file) == conf.cgi_pass[c].cgi_pass)
+        if (extention(file) == conf->cgi_pass[c].cgi_pass)
             return 1;
     }
     return 0;
