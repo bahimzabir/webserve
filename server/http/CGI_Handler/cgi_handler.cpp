@@ -14,13 +14,16 @@ void	http_response::CGI_executer() {
         len = getSize(cgi_data.input);
     else
         len = std::atoi(request->get_header("CONTENT-LENGTH").c_str());
-	env[0] = strdup(("PATH_INFO=" + pathInfo).c_str());
-    env[1] = strdup(("CONTENT_TYPE=" + request->get_header("CONTENT-TYPE")).c_str());
-    //env[2] = strdup(("REQUEST_METHOD=" + request->get_method()).c_str());
+    if (request->get_header("CONTENT-TYPE") != "")
+        env[0] = strdup(("CONTENT_TYPE=" + request->get_header("CONTENT-TYPE")).c_str());
+    else
+        env[0] = strdup(("CONTENT_TYPE=NULL"));
+    
+    env[1] = strdup(("REQUEST_METHOD=" + request->get_method()).c_str());
     env[2] = strdup(("CONTENT_LENGTH=" + int_to_string(len)).c_str());
-    env[3] = strdup("REDIRECT_STATUS=/Users/hait-moh/Desktop/webserv/webserve/in.html");
-	env[4] = NULL;
-    std::cout << strdup(conf.cgi_pass[0].cgi_param.c_str()) << std::endl;
+    env[3] = strdup(("SCRIPT_FILENAME=" + conf.root).c_str());
+    env[4] = strdup("REDIRECT_STATUS=200");
+	env[5] = NULL;
 	free(pwd);
 	fd = cgi_data.input_fd;
 	int out_fd = cgi_data.output_fd;
