@@ -60,6 +60,7 @@ struct config {
 	std::vector<errorPage>			err_pages_struct;
 	// to be defined
 	std::map<int, std::string>		error_pages;
+	bool	operator == (const config& conf);
 };
 extern std::vector<config> config_info;
 

@@ -3,6 +3,17 @@
 
 std::vector<config> config_info;
 
+void	check_ports() {
+	int size = config_info.size();
+	std::map<std::string, std::vector<std::string> > np;
+	for (int i = 0; i < (size - 1); i++) {
+		for (int j = i + 1; j < size - 1; j++) {
+			if (config_info[i] == config_info[j])
+				throw Exception("fatal: servers ports conflict, cannot init the server\n"); 
+		}
+	}
+}
+
 void	pathTrim(std::string& str) {
     int i = 0;
     int j = str.size() - 1;
@@ -53,4 +64,5 @@ void server_init(std::string confPath) {
 		config& cf = *it;
 		init_default_params(cf);
 	}
+	check_ports();
 }
