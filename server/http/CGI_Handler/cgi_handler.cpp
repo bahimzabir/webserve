@@ -27,8 +27,9 @@ void	http_response::CGI_executer() {
     env[4] = strdup("REDIRECT_STATUS=200");
     env[5] = strdup(("QUERY_STRING=" + conf.query).c_str());
     env[6] = strdup(("HTTP_COOKIE=" + request->get_header("COOKIE")).c_str());
+    env[7] = strdup(("PATH_INFO=" + conf.root).c_str());
     std::cout << "////////////////////////" << conf.query << std::endl;
-	env[7] = NULL;
+	env[8] = NULL;
 	free(pwd);
 	fd = cgi_data.input_fd;
 	int out_fd = cgi_data.output_fd;
@@ -73,8 +74,12 @@ void	http_response::CGI_WAITER() {
     {
         state = PARSER;
         if (cgi_data.input != "")
+        {
             close(cgi_data.input_fd);
+            cgi_data.input_fd = -1;
+        }
         close(cgi_data.output_fd);
+        cgi_data.output_fd = -1;
         file.open(cgi_data.output);
         if (!file.good())
         {
