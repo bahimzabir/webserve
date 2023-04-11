@@ -113,9 +113,9 @@ class http_response
     size_t remaining_bytes();
     public:
         http_response(http_request *req,struct pollfd *fd,std::string &host,std::string &port,size_t *out_time);
+        ~http_response();
         void generate_response(pollfd *fd,http_request *req,size_t *out_time);
 };
-
 std::string int_to_string(int a);
 std::string extention(std::string &file);
 int count_nl (char *str,int len);

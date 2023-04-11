@@ -286,6 +286,26 @@ int http_response::check_cgi(std::string &file)
     return 0;
 }
 
+http_response::~http_response()
+{
+    std::cout << "DESTRUCTOR called" << std::endl;
+    if (is_cgi)
+    {
+        if (cgi_data.input != "")
+        {
+            if (cgi_data.input_fd != -1)
+                close(cgi_data.input_fd);
+            remove(cgi_data.input.c_str());
+        }
+        if (cgi_data.output != "")
+        {
+            if (cgi_data.output_fd != -1)
+                close(cgi_data.output_fd);
+            remove(cgi_data.output.c_str());
+        }
+    }
+}
+
 std::string int_to_string(int a)
 {
     std::stringstream temp;

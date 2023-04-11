@@ -26,8 +26,9 @@ void	http_response::CGI_executer() {
     env[3] = strdup(("SCRIPT_FILENAME=" + conf.root).c_str());
     env[4] = strdup("REDIRECT_STATUS=200");
     env[5] = strdup(("QUERY_STRING=" + conf.query).c_str());
+    env[6] = strdup(("HTTP_COOKIE=" + request->get_header("COOKIE")).c_str());
     std::cout << "////////////////////////" << conf.query << std::endl;
-	env[6] = NULL;
+	env[7] = NULL;
 	free(pwd);
 	fd = cgi_data.input_fd;
 	int out_fd = cgi_data.output_fd;
@@ -42,9 +43,11 @@ void	http_response::CGI_executer() {
 		args[1] = strdup(conf.root.c_str());
 		args[2] = NULL;
 		execve(args[0], args, env);
+        for (int i = 0;i < 7;i++)
+            free(env[i]);
 		exit(1);
 	}
-    for (int i = 0;i < 6;i++)
+    for (int i = 0;i < 7;i++)
         free(env[i]);
     if (pid == -1)
         throw SERVER_ERROR;
