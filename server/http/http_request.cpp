@@ -112,7 +112,7 @@ std::string http_request::get_headers()
     return head;
 }
 
-void http_request::parse_remaining(char *buffer,int len, int n_new_line, long long *out_time)
+void http_request::parse_remaining(char *buffer,int len, int n_new_line, size_t *out_time)
 {
     void (http_request::*handlers[2])() = {&http_request::http_header_handler,&http_request::headers_handler};
 
@@ -151,7 +151,7 @@ const std::string &http_request::get_method()
 {
     return http_header[0];
 }
-const std::string &http_request::get_path()
+std::string &http_request::get_path()
 {
     return http_header[1];
 }

@@ -12,7 +12,7 @@
 #include <poll.h>
 #include <cstdio>
 #include <sys/time.h>
-
+#include <signal.h>
 
 
 #define FILE 1
@@ -56,21 +56,6 @@ struct t_cgi_data
 	int	input_fd;
 	std::string	output;
 	int	output_fd;
-
-};
-
-class cgii
-{
-	std::map<std::string, std::string> env;
-	std::map<std::string, std::string> header;
-
-	public:
-	// void			setEnv();
-	void execution();
-	std::string getScript(const std::string &uri);
-	std::string getQueries(const std::string &uri);
-	// http_request	req;
-	// http_response	res;
 };
 
 class http_response
@@ -82,12 +67,12 @@ class http_response
     std::map<std::string,std::string> headers;
     std::map<std::string,std::string> content_type;
     std::string res_header;
-    long long content_remaining;
+    size_t content_remaining;
     std::string body;
     std::fstream file;
     config_match conf;
     struct pollfd *client;
-    long long *timeout;
+    size_t *timeout;
     int type;
 
 
@@ -125,15 +110,17 @@ class http_response
     void ERROR_handler(int x);
 
 
-    long long remaining_bytes();
+    size_t remaining_bytes();
     public:
-        http_response(http_request *req,struct pollfd *fd,std::string &host,std::string &port,long long *out_time);
-        void generate_response(pollfd *fd,http_request *req,long long *out_time);
+        http_response(http_request *req,struct pollfd *fd,std::string &host,std::string &port,size_t *out_time);
+        void generate_response(pollfd *fd,http_request *req,size_t *out_time);
 };
 
 std::string int_to_string(int a);
 std::string extention(std::string &file);
 int count_nl (char *str,int len);
 size_t getSize(std::string filename);
-long long	get_running_time(long long start_time);
-long long	get_time(void);
+size_t	get_running_time(size_t start_time);
+size_t	get_time(void);
+std::string get_query(std::string &path);
+void decode(std::string &str);

@@ -57,7 +57,7 @@ int servers::deploy()
     signal(SIGPIPE, SIG_IGN);
     while (1)
     {
-        num_of_revents = poll(&(fd_poll[0]),fd_poll.size(),-1);//wait for events
+        num_of_revents = poll(&(fd_poll[0]),fd_poll.size(),3000);//wait for events
         for (int i = 0;i < fd_poll.size();i++)
         {
             std::cout << data.size() << "-------------" << fd_poll.size() << std::endl;

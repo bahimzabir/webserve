@@ -34,6 +34,14 @@ std::string extention(std::string &file)
     return file.substr(pos + 1);
 }
 
+bool fexists(const char *filename)
+{
+    std::ifstream ifile(filename);
+    if (ifile)
+        return 1;
+    else
+        return 0;
+}
 
 void http_response::POST_upload_chunked_handler(void)
 {
@@ -48,7 +56,7 @@ void http_response::POST_upload_chunked_handler(void)
             ret = recv(client->fd,buffer,2048,0);
             *timeout = get_time();
         }
-        if (ret == -1)
+        if (ret == -1 || !ret)
             throw END;
         body.append(buffer,ret);
     }
@@ -201,7 +209,11 @@ void http_response::POST_check_state()
     {
         std::string name;
         if (!is_cgi && request->get_header("FILE_NAME") != "")
+        {
             name = conf.upload_pass + '/' + request->get_header("FILE_NAME");
+            if (fexists(name.c_str()))
+                throw FORBIDDEN;
+        }
         else
             name = conf.upload_pass + "/XXXXXX";
         int fd = mkstemp(&name[0]);

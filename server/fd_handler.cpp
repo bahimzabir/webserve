@@ -21,7 +21,7 @@ void servers::client_req_handler(int &index)
     char buffer[1025];
     int ret;
     ret = recv(fd_poll[index].fd,buffer,1024,0);
-    if (ret == -1)
+    if (ret == -1 || !ret)
         throw END;
     buffer[ret] = 0;
     data[index].time = get_time();

@@ -1,6 +1,6 @@
 #include "http_response.hpp"
 
-http_response::http_response(http_request *req,struct pollfd *fd,std::string &host,std::string &port,long long *out_time)
+http_response::http_response(http_request *req,struct pollfd *fd,std::string &host,std::string &port,size_t *out_time)
 {
     content_type["html"] =  "text/html";
     content_type["htm"] =  "text/html";
@@ -136,6 +136,9 @@ http_response::http_response(http_request *req,struct pollfd *fd,std::string &ho
     is_cgi = 0;
     try
     {
+        conf.query = get_query(request->get_path());
+        decode(conf.query);
+        decode(request->get_path());
         get_config(host,port,request->get_path(),request->get_header("HOST"), &conf);
         if (met_map.find(request->get_method()) == met_map.end())
             throw NOT_IMPLEMENTED;
@@ -172,7 +175,7 @@ http_response::http_response(http_request *req,struct pollfd *fd,std::string &ho
 }
 
 
-void http_response::generate_response(pollfd *fd,http_request *req,long long *out_time)
+void http_response::generate_response(pollfd *fd,http_request *req,size_t *out_time)
 {
     client = fd;
     request = req;
@@ -275,7 +278,10 @@ int http_response::check_cgi(std::string &file)
     for (int c = 0; c < conf.cgi_pass.size();c++)
     {  
         if (extention(file) == conf.cgi_pass[c].cgi_pass)
+        {
+            conf.binary_root = conf.cgi_pass[c].cgi_param;
             return 1;
+        }
     }
     return 0;
 }
@@ -287,7 +293,7 @@ std::string int_to_string(int a)
     return temp.str();
 }
 
-long long	get_time(void)
+size_t	get_time(void)
 {
 	struct timeval	current_time;
 
@@ -295,7 +301,38 @@ long long	get_time(void)
 	return ((current_time.tv_sec * 1000 + (current_time.tv_usec) / 1000));
 }
 
-long long	get_running_time(long long start_time)
+size_t	get_running_time(size_t start_time)
 {
 	return (get_time() - start_time);
+}
+std::string get_query(std::string &path)
+{
+    size_t b;
+    std::string tmp;
+    b = path.find_last_of('?');
+    if (b == path.npos)
+        return ("");
+    if (b + 1 < path.size())
+        tmp = path.substr(b + 1);
+    path.erase(b,path.size());
+    return tmp;
+}
+
+void decode(std::string &str)
+{
+    std::string decoded;
+    int charac;
+    for (int i = 0;i < str.size();i++)
+    {
+        if (str[i] == '%' && i + 2 < str.size())
+        {
+            charac = strtoll(str.substr(i + 1,2).c_str(),NULL,16);
+            if (charac != 0)
+                decoded += (char)charac;
+            i += 2;
+        }
+        else
+            decoded += str[i];
+    }
+    str = decoded;
 }

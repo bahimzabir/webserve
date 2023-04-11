@@ -14,6 +14,8 @@ struct config_match
     long				    	client_max_body_size;
 	std::map<int, std::string>	err_pages;
     std::string                 return_value;
+    std::string                 query;
+    std::string                 binary_root;
 };
 
 //Note: you have to free the config_match returned after using it

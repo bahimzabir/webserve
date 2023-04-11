@@ -1,14 +1,16 @@
 #include "../http_response.hpp"
 
+
 void	http_response::CGI_executer() {
 	int i = 0;
-	int status, pid, fd;
-	int p[2];
+    int pid, fd;
 	char *args[3];
 	char *env[10];
 
 	char *pwd = getcwd(NULL, 0);
-	std::string pathInfo = std::string(pwd);
+    std::string pathInfo;
+    if (pwd)
+        pathInfo = std::string(pwd);
     int len = 0;
     if (request->get_header("TRANSFER-ENCODING") == "chunked")
         len = getSize(cgi_data.input);
@@ -23,7 +25,9 @@ void	http_response::CGI_executer() {
     env[2] = strdup(("CONTENT_LENGTH=" + int_to_string(len)).c_str());
     env[3] = strdup(("SCRIPT_FILENAME=" + conf.root).c_str());
     env[4] = strdup("REDIRECT_STATUS=200");
-	env[5] = NULL;
+    env[5] = strdup(("QUERY_STRING=" + conf.query).c_str());
+    std::cout << "////////////////////////" << conf.query << std::endl;
+	env[6] = NULL;
 	free(pwd);
 	fd = cgi_data.input_fd;
 	int out_fd = cgi_data.output_fd;
@@ -33,31 +37,35 @@ void	http_response::CGI_executer() {
 		    dup2(fd, 0);
 		dup2(out_fd, 1);
 		close(fd);
-		args[0] = strdup(conf.cgi_pass[0].cgi_param.c_str());
+        close(out_fd);
+		args[0] = strdup(conf.binary_root.c_str());
 		args[1] = strdup(conf.root.c_str());
 		args[2] = NULL;
 		execve(args[0], args, env);
 		exit(1);
 	}
-    else if (pid == -1)
+    for (int i = 0;i < 6;i++)
+        free(env[i]);
+    if (pid == -1)
         throw SERVER_ERROR;
     cgi_data.pid = pid;
     state = WAITER;
-    free(env[0]);
 }
 
 
 void	http_response::CGI_WAITER() {
     int status = -1;
-    std::cout << get_running_time(*timeout) << std::endl;
+
+    int ret = waitpid(cgi_data.pid,&status,WNOHANG);
     if (get_running_time(*timeout) >= 3000)
     {
         *timeout = get_time();
+        kill(cgi_data.pid,SIGKILL);
         throw GATEWAY_TIMEOUT;
     }
-    int ret = waitpid(cgi_data.pid,&status,WNOHANG);
     if (WEXITSTATUS(status) == 1)
         throw BAD_GATEWAY;
+
     if (ret != 0)
     {
         state = PARSER;
@@ -74,7 +82,7 @@ void	http_response::CGI_WAITER() {
     }
 }
 
-long long http_response::remaining_bytes()
+size_t http_response::remaining_bytes()
 {
     std::streampos begin = file.tellg();
     file.seekg(0,std::ios::end);

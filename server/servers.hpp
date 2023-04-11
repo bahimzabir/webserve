@@ -19,7 +19,7 @@ struct t_data
     http_response *response;
     std::string host;
     std::string port;
-    long long time;
+    size_t time;
 };
 
 class servers
