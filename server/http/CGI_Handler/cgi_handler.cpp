@@ -7,10 +7,6 @@ void	http_response::CGI_executer() {
 	char *args[3];
 	char *env[10];
 
-	char *pwd = getcwd(NULL, 0);
-    std::string pathInfo;
-    if (pwd)
-        pathInfo = std::string(pwd);
     int len = 0;
     if (request->get_header("TRANSFER-ENCODING") == "chunked")
         len = getSize(cgi_data.input);
@@ -30,7 +26,6 @@ void	http_response::CGI_executer() {
     env[7] = strdup(("PATH_INFO=" + conf.root).c_str());
     std::cout << "////////////////////////" << conf.query << std::endl;
 	env[8] = NULL;
-	free(pwd);
 	fd = cgi_data.input_fd;
 	int out_fd = cgi_data.output_fd;
 	pid = fork();

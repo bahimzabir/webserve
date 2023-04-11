@@ -12,31 +12,23 @@
 
 #include "http_request.hpp"
 
-bool http_request::isValidHttpRequest() {
-	
-	bool hasResourcePath = false;
-    bool hasHttpVersion = false;
-    bool hasContentLength = false;
-    bool hasContentType = false;
-    bool hasMessageBody = false;
-
-
-	hasResourcePath = http_header[2] == "HTTP/1.1" ? true : false;
-	hasHttpVersion = !http_header[1].empty() ? true : false;
-	if ((http_header[0] == "GET" || http_header[0] == "DELETE"))
-			return hasResourcePath && hasHttpVersion;
-	else if (http_header[0] == "POST")
+void http_request::isValidHttpRequest() {
+	bool hasHttpVersion = http_header[2] == "HTTP/1.1";
+	bool ResourcePath = http_header[1] != "";
+    if (!hasHttpVersion || !ResourcePath)
+        throw 400;
+	if (http_header[0] == "POST")
 	{
-		for(int i = 0; i < headers.size(); i++) {
-			if (headers[i].first == "CONTENT-TYPE")
-				hasContentType = true;
-			else if (headers[i].first == "TRANSFER-ENCODING" || headers[i].first == "CONTENT-LENGTH")
-				hasContentLength = true;
-			else if (headers[i].first == "MESSAGE-BODY")
-				hasMessageBody = true;
-		}
-		return hasResourcePath && hasHttpVersion && hasContentLength && hasContentType && hasMessageBody;
+        if (get_header("TRANSFER-ENCODING") != "" && get_header("TRANSFER-ENCODING") != "chunked")
+            throw 501;
+        else if (get_header("TRANSFER-ENCODING") == "chunked")
+            return;
+        if (get_header("CONTENT-LENGTH") == "")
+            throw 400;
+        long long amount = strtoll(get_header("CONTENT-LENGTH").c_str(),NULL,10);
+        if (amount < 0)
+            throw 400;
+        if (errno == ERANGE)
+            throw 400;
 	}
-	else
-		return false;
 }

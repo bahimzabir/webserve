@@ -23,7 +23,6 @@ void http_response::GET_check_state()
             if (request->get_path().back() != '/')
             {
                 headers["LOCATION"] = (request->get_path() + "/");
-                std::cout << "************" << headers["LOCATION"] <<std::endl;
                 throw 301;
             }
             for (int i = 0;i < conf.index.size();i++)
