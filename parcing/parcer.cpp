@@ -163,7 +163,7 @@ std::vector<config> getServersInfos(std::string configFilePath) {
 			break;
 		if (parce_scoop == OUT_SCOOP) {
 			if (cmd[i++] != "server") {
-				throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": '" +cmd[i] +"' is undefined, Do you mean 'server'\n");
+				throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": '" +cmd[i - 1] +"' is undefined, Do you mean 'server'\n");
 			}
 			parce_scoop = PRE_SERVER_SCOOP;
 			while(i < cmd.size() && cmd[i] == "\n")
