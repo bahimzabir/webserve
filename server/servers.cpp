@@ -7,7 +7,7 @@ servers::servers()
     d.type = LISTENER;
     int index = 0;
 
-    for (int i = 0;i < config_info.size();i++)
+    for (int i = 0;i < config_info.size() - 1;i++)
     {
         for (int port_index = 0; port_index < config_info[i].ports.size();port_index++)
         {
@@ -39,7 +39,7 @@ servers::servers()
     if (!sockets.size())
     {
         std::cerr << "No server On" << std::endl;
-        exit(0);
+        exit(1);
     }
 }
 void servers::delete_client(int index)
@@ -61,17 +61,16 @@ int servers::deploy()
         for (int i = 0;i < fd_poll.size();i++)
         {
             std::cout << data.size() << "-------------" << fd_poll.size() << std::endl;
-            if (num_of_revents <= 0)
-                break;
             try
             {
                 if (fd_poll[i].revents & POLLBOTH)
                 {
                     (this->*handlers[data[i].type])(i);//CALL THE function handler based on type
                     fd_poll[i].revents = 0;
-                    num_of_revents--;
                 }
                 if (data[i].type != LISTENER && get_running_time(data[i].time) >= 3000)
+                    throw END;
+                if (data[i].type == RESPONSE && (fd_poll[i].revents & POLLHUP) && (fd_poll[i].events & POLLOUT))
                     throw END;
             }
             catch (int status)

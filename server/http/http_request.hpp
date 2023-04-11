@@ -35,6 +35,6 @@ class http_request
         std::string get_headers();
         std::stringstream &get_remaining();
         void reset();
-        bool isValidHttpRequest();
+        void isValidHttpRequest();
 };
 int count_nl (char *str,int len);

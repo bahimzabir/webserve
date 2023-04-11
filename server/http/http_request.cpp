@@ -58,10 +58,13 @@ void http_request::http_header_handler()
     std::string field;
 
     std::getline(str_stream,field,' ');
+    trim_field(field);
     http_header[0] = field;
     std::getline(str_stream,field,' ');
+    trim_field(field);
     http_header[1] = field;
     std::getline(str_stream,field,' ');
+    trim_field(field);
     http_header[2] = field;
     std::cout <<http_header[0] + " " << http_header[1] + " " << http_header[2] + " "<< std::endl;
     if ((int)http_header[0][0] == 22)

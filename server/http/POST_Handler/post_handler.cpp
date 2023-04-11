@@ -217,6 +217,7 @@ void http_response::POST_check_state()
         else
             name = conf.upload_pass + "/XXXXXX";
         int fd = mkstemp(&name[0]);
+        cgi_data.input_fd = -1;
         if (fd == -1)
             throw SERVER_ERROR;
         cgi_data.input = name;
