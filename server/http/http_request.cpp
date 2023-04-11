@@ -26,6 +26,8 @@ void trim_field(std::string &field)
 http_request::http_request()
 {
     state  = HTTP_HEADER;
+    remaining_nl = 0;
+    std::cout << "CONSTRUCTOR    *----------------" << remaining_nl << std::endl;
 }
 void http_request::push_header(std::string &line)
 {
@@ -73,7 +75,7 @@ void http_request::headers_handler()
     while (remaining_nl)
     {
         std::getline(remaining,line,'\n');
-        std::cout << "*" << line << "*" << std::endl;
+        std::cout << "*" << line << "*" << remaining_nl <<  std::endl;
         remaining_nl--;
         if (line == "\r")
         {
@@ -113,24 +115,26 @@ void http_request::parse_remaining(char *buffer,int len, int n_new_line)
     void (http_request::*handlers[2])() = {&http_request::http_header_handler,&http_request::headers_handler};
 
 
-
+    std::cout <<  "hanaya************************"  << remaining_nl << std::endl;
     remaining_nl += n_new_line;
     remaining.write(buffer,len);
-    std::cout << "dkhlat" << state << std::endl;
     while (remaining_nl && state != REQUEST_BODY)
         (this->*handlers[state])();
-    std::cout << "dkhlat" << state << std::endl;
 }
 
 
 http_request &http_request::operator=(const http_request &obj)
 {
+    remaining_nl = 0;
+    state  = HTTP_HEADER;
     state = obj.state;
     return *this;
 }
 
 http_request::http_request(const http_request &obj)
 {
+    remaining_nl = 0;
+    state  = HTTP_HEADER;
     state = obj.state;
     return;
 }

@@ -49,9 +49,10 @@ void servers::listener_handler(int &index)
     pollfd *p;
     t_data *d;
 
+    std::cout << "hna" << std::endl;
     fd_poll.push_back(pollfd());
     data.push_back(t_data());
-
+    std::cout << "hna" << std::endl;
     d = &data[data.size() - 1];
     p = &fd_poll[fd_poll.size() - 1];
     d->type = REQUEST;

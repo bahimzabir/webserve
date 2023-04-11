@@ -38,3 +38,4 @@ class http_request
         void reset();
         bool isValidHttpRequest();
 };
+int count_nl (char *str,int len);

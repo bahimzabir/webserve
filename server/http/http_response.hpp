@@ -11,6 +11,7 @@
 #include "error_pages_map.hpp"
 #include <poll.h>
 #include <cstdio>
+#include <sys/time.h>
 
 
 
@@ -132,3 +133,5 @@ std::string int_to_string(int a);
 std::string extention(std::string &file);
 int count_nl (char *str,int len);
 size_t getSize(std::string filename);
+long long	get_running_time(long long start_time);
+long long	get_time(void);
