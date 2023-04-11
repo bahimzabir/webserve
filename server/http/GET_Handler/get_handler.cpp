@@ -20,6 +20,11 @@ void http_response::GET_check_state()
     {
         if (S_ISDIR(s.st_mode))
         {
+            if (request->get_path().back() != '/')
+            {
+                headers["LOCATION"] = request->get_path() + '/';
+                throw 301;
+            }
             for (int i = 0;i < conf.index.size();i++)
             {
                 std::ifstream f(conf.root + "/" + conf.index[i]);
