@@ -117,21 +117,15 @@ config_match& get_config(std::string host, std::string port, std::string rout, s
 	std::string rout2;
 	rout2 = rout;
 
-	pathTrim(server_name);
 	pathTrim(rout);
-	// std::cerr << "[" + server_name + "]\n";
-	// std::cerr << "[" + rout + "]\n";
-	// std::cerr << "[" + host + "]\n";
-	// std::cerr << "[" + port + "]\n";
 	for (std::vector<config>::reverse_iterator it = config_info.rbegin(); it != config_info.rend(); it++) {
 		config& cf = *it;
 		if (cf.host == host && std::find(cf.ports.begin(), cf.ports.end(), port) != cf.ports.end())
 		{	
 			match_lvl1 = &cf;
-			rt = rout_matching(cf.routes, rout, rout2);
-			// std::cerr << "rout2 = " << rout2 << "\n";
 			if (std::find(cf.server_names.begin(), cf.server_names.end(), server_name) != cf.server_names.end())
 				match_lvl2 = &cf;
+			rt = match_lvl2 ? rout_matching(match_lvl2->routes, rout, rout2) : rout_matching(match_lvl1->routes, rout, rout2);
 		}
 	}
 
