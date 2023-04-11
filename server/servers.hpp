@@ -39,4 +39,4 @@ class servers
         void timeout_handler(int index);
 };
 
-void server_init();
+void server_init(std::string confPath);

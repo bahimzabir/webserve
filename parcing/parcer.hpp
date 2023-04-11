@@ -27,6 +27,7 @@
 #define	DEF_INDEX "index.html"
 #define	DEF_AUTO_INDEX 0
 #define DEF_ROOT "/"
+#define DEF_COF_PATH "parcing/config.conf"
 
 struct errorPage{
 	int			error_num;

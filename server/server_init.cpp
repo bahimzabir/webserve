@@ -44,10 +44,11 @@ void	init_default_params(config& conf) {
 	}
 }
 
-void server_init() {
-	config_info = getServersInfos("parcing/config.conf");
+void server_init(std::string confPath) {
+	config_info = getServersInfos(confPath);
+	if (config_info.size() == 0)
+		config_info.push_back(config());
 	config_info.push_back(config());
-	//std::cerr << "debug = " << configs.back().routes.size() << "\n";
 	for (std::vector<config>::iterator it = config_info.begin(); it != config_info.end(); it++) {
 		config& cf = *it;
 		init_default_params(cf);
