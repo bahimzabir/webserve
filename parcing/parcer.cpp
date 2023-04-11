@@ -276,6 +276,8 @@ std::vector<config> getServersInfos(std::string configFilePath) {
 							cgi_pass_index++;
 							if (cmd[i] == ";" || cmd[i] == "\n")
 								throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": "+ cmd[i] +" 'cgi_param' is invalid for the cgi\n");
+							if (cmd[i] != "php" && cmd[i] != "pl")
+								throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": "+ cmd[i] +" 'cgi_param' has to be 'php' or 'pl'\n");
 							servers[servers_index].routes[routes_index].cgi_pass[cgi_pass_index].cgi_pass = cmd[i];
 							i++;
 							if (cmd[i] == ";" || cmd[i] == "\n" )
