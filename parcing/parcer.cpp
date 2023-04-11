@@ -206,6 +206,8 @@ std::vector<config> getServersInfos(std::string configFilePath) {
 						servers[servers_index].ports.push_back(cmd[i]);
 						if (cmd[i] == "\n")
 							throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": ';' is expected\n");
+						if (!is_digit(cmd[i]))
+							throw Exception(configFilePath + ":line " + line_num(cmd, i) + ": port has to be a digit\n");
 						i++;
 					}
 				} else if (cmd[i] == "server_name") {
