@@ -27,7 +27,6 @@ http_request::http_request()
 {
     state  = HTTP_HEADER;
     remaining_nl = 0;
-    std::cout << "CONSTRUCTOR    *----------------" << remaining_nl << std::endl;
 }
 void http_request::push_header(std::string &line)
 {
@@ -113,12 +112,11 @@ std::string http_request::get_headers()
     return head;
 }
 
-void http_request::parse_remaining(char *buffer,int len, int n_new_line)
+void http_request::parse_remaining(char *buffer,int len, int n_new_line, long long *out_time)
 {
     void (http_request::*handlers[2])() = {&http_request::http_header_handler,&http_request::headers_handler};
 
-
-    std::cout <<  "hanaya************************"  << remaining_nl << std::endl;
+    timeout = out_time;
     remaining_nl += n_new_line;
     remaining.write(buffer,len);
     while (remaining_nl && state != REQUEST_BODY)

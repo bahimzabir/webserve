@@ -49,6 +49,7 @@ void servers::delete_client(int index)
     delete data[index].response;
     data.erase(data.begin() + index);
 }
+
 int servers::deploy()
 {
     void (servers::*handlers[4])(int &) = {&servers::listener_handler,&servers::client_req_handler,&servers::client_res_handler};
@@ -56,38 +57,35 @@ int servers::deploy()
     signal(SIGPIPE, SIG_IGN);
     while (1)
     {
-        
         num_of_revents = poll(&(fd_poll[0]),fd_poll.size(),-1);//wait for events
         for (int i = 0;i < fd_poll.size();i++)
         {
             std::cout << data.size() << "-------------" << fd_poll.size() << std::endl;
             if (num_of_revents <= 0)
                 break;
-            if (fd_poll[i].revents & POLLBOTH)
+            try
             {
-                try
+                if (fd_poll[i].revents & POLLBOTH)
                 {
                     (this->*handlers[data[i].type])(i);//CALL THE function handler based on type
                     fd_poll[i].revents = 0;
+                    num_of_revents--;
                 }
-                catch (int status)
-                {
-                    if (status == END)
-                        delete_client(i--);
-                }
-                catch (std::exception &Exception)
-                {
-                    if (data[i].type == LISTENER && data.size() != fd_poll.size())
-                        fd_poll.erase(fd_poll.end() - 1);
-                    if (data[i].type == REQUEST)
-                        delete_client(i--);
-                    else if (data[i].type == RESPONSE)
-                    {
-                        
-                    }
-                }
-                num_of_revents--;
+                if (data[i].type != LISTENER && get_running_time(data[i].time) >= 3000)
+                    throw END;
             }
+            catch (int status)
+            {
+                if (status == END)
+                    delete_client(i--);
+            }
+            catch (std::exception &Exception)
+            {
+                if (data[i].type == LISTENER && data.size() != fd_poll.size())
+                    fd_poll.erase(fd_poll.end() - 1);
+                else
+                    delete_client(i--);
+            } 
         }
     }
 }

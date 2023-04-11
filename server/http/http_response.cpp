@@ -1,6 +1,6 @@
 #include "http_response.hpp"
 
-http_response::http_response(http_request *req,struct pollfd *fd,std::string &host,std::string &port)
+http_response::http_response(http_request *req,struct pollfd *fd,std::string &host,std::string &port,long long *out_time)
 {
     content_type["html"] =  "text/html";
     content_type["htm"] =  "text/html";
@@ -100,8 +100,9 @@ http_response::http_response(http_request *req,struct pollfd *fd,std::string &ho
 
     content_remaining = 0;
     request = req;
+    timeout = out_time;
     void (http_response::*state_handlers[3])() = {&http_response::GET_check_state,&http_response::POST_check_state,&http_response::DELETE_check_state};
-    
+
     // for (int i = 0; i <  conf.methods.size(); i++) {
     //     std::cout << "method: [" << conf.methods[i] << "]\n";
     // }
@@ -171,10 +172,11 @@ http_response::http_response(http_request *req,struct pollfd *fd,std::string &ho
 }
 
 
-void http_response::generate_response(pollfd *fd,http_request *req)
+void http_response::generate_response(pollfd *fd,http_request *req,long long *out_time)
 {
     client = fd;
     request = req;
+    timeout = out_time;
     void (http_response::*handlers[4])() = {&http_response::GET_handler,&http_response::POST_handler,&http_response::CGI_handler,&http_response::SEND_handler};
     try
     {
@@ -202,9 +204,15 @@ void http_response::SEND_handler()
     int ret;
     std::cout << client->fd << std::endl;
     if (res_header != "")
+    {
         ret = send(client->fd,res_header.c_str(),res_header.size(),0);
+        *timeout = get_time();
+    }
     else
+    {
         ret = send(client->fd,body.c_str(),body.size(),0);
+        *timeout = get_time();
+    }
     if (ret == -1)
         throw END;
     if (res_header == "")

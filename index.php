@@ -1,4 +1,4 @@
 <?php
 	echo "Hello World!";
-    sleep(1);
+    sleep(4);
 ?>

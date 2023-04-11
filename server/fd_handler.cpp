@@ -24,12 +24,13 @@ void servers::client_req_handler(int &index)
     if (ret == -1)
         throw END;
     buffer[ret] = 0;
-    data[index].request.parse_remaining(buffer,ret,count_nl(buffer,ret));
+    data[index].time = get_time();
+    data[index].request.parse_remaining(buffer,ret,count_nl(buffer,ret),&data[index].time);
     if (data[index].request.get_state() == REQUEST_BODY)
     {
         fd_poll[index].events = POLLOUT;
         data[index].type = RESPONSE;
-        data[index].response = new http_response(&data[index].request,&(fd_poll[index]),data[index].host,data[index].port);
+        data[index].response = new http_response(&data[index].request,&(fd_poll[index]),data[index].host,data[index].port,&(data[index].time));
         return;
     }
 }
@@ -38,7 +39,7 @@ void servers::client_res_handler(int &index)
 {
     if (!((fd_poll[index].events & POLLOUT) && (fd_poll[index].revents & POLLOUT)) && !((fd_poll[index].events & POLLIN) && (fd_poll[index].revents & POLLIN)))
         return ;
-    data[index].response->generate_response(&(fd_poll[index]),&(data[index].request));
+    data[index].response->generate_response(&(fd_poll[index]),&(data[index].request),&(data[index].time));
 }
 
 void servers::listener_handler(int &index)
@@ -69,5 +70,6 @@ void servers::listener_handler(int &index)
         d->host = data[index].host;
         d->response = NULL;
         d->port = data[index].port;
+        d->time = get_time();
     }
 }

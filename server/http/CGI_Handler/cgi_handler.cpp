@@ -49,6 +49,12 @@ void	http_response::CGI_executer() {
 
 void	http_response::CGI_WAITER() {
     int status = -1;
+    std::cout << get_running_time(*timeout) << std::endl;
+    if (get_running_time(*timeout) >= 3000)
+    {
+        *timeout = get_time();
+        throw GATEWAY_TIMEOUT;
+    }
     int ret = waitpid(cgi_data.pid,&status,WNOHANG);
     if (WEXITSTATUS(status) == 1)
         throw BAD_GATEWAY;
@@ -84,7 +90,7 @@ void	http_response::CGI_PARSER() {
     file.read(buffer,1000);
 
     buffer[file.gcount()] = 0;
-    request->parse_remaining(buffer,file.gcount(),count_nl(buffer,file.gcount()));
+    request->parse_remaining(buffer,file.gcount(),count_nl(buffer,file.gcount()),timeout);
     if (request->get_state() == REQUEST_BODY)
     {
         type = GET;

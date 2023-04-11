@@ -19,6 +19,7 @@ struct t_data
     http_response *response;
     std::string host;
     std::string port;
+    long long time;
 };
 
 class servers
@@ -26,8 +27,7 @@ class servers
     std::vector<struct pollfd> fd_poll;
     std::vector<t_data> data;
     std::vector<_socket> sockets;
-    
-    //std::vector<servers> configs;
+
     public:
         servers();
         void client_req_handler(int &index);
@@ -36,6 +36,7 @@ class servers
         void file_handler(int index);
         void delete_client(int index);
         int deploy();
+        void timeout_handler(int index);
 };
 
 void server_init();
