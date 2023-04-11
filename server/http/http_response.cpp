@@ -230,7 +230,8 @@ void http_response::ERROR_handler(int x)
     std::cout << "Error asat ::  " << x << std::endl;
     res_header.clear();
     body.clear();
-    headers.clear();
+    if (x != 301)
+        headers.clear();
     if (file.is_open())
         file.close();
     client->events = POLLOUT;
@@ -258,7 +259,8 @@ void http_response::ERROR_handler(int x)
     headers["Content-Length"] = int_to_string(body.size());
     std::cout << "excesss        = " << body  << std::endl;
     headers["Content-Type"] = content_type["html"];
-    if (x == 301)
+    std::cout << "************" << headers["LOCATION"] <<std::endl;
+    if (x == 301 && headers["LOCATION"] == "")
         headers["LOCATION"] = conf.return_value;
     res_header = "HTTP/1.1 " + int_to_string(x) + " " + errors.get_message(x) + "\n";
     for (std::map<std::string,std::string>::iterator it = headers.begin(); it != headers.end(); it++)
