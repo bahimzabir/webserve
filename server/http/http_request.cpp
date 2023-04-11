@@ -64,6 +64,9 @@ void http_request::http_header_handler()
     http_header[1] = field;
     std::getline(str_stream,field,' ');
     http_header[2] = field;
+    std::cout <<http_header[0] + " " << http_header[1] + " " << http_header[2] + " "<< std::endl;
+    if ((int)http_header[0][0] == 22)
+        throw 666;
     state = REQUEST_HEADERS;
     remaining_nl--;
 }

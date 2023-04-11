@@ -67,6 +67,7 @@ void servers::listener_handler(int &index)
         p->events = POLLIN;
         p->revents = 0;
         d->host = data[index].host;
+        d->response = NULL;
         d->port = data[index].port;
     }
 }
