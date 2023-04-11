@@ -44,7 +44,10 @@ void http_response::POST_upload_chunked_handler(void)
     if (content_remaining != -1 && (body == "" || !new_line(body)))
     { 
         if ((client->events & POLLIN) && (client->revents & POLLIN))
+        {
             ret = recv(client->fd,buffer,2048,0);
+            *timeout = get_time();
+        }
         if (ret == -1)
             throw END;
         body.append(buffer,ret);
@@ -100,7 +103,10 @@ void http_response::POST_upload_normal_handler(void)
     int ret = 0;
     int size = 0;
     if (content_remaining != -1 && body.size() == 0)
+    {
         ret = recv(client->fd,buffer,2048,0);
+        *timeout = get_time();
+    }
     if (ret == -1)
         throw END;
     if (content_remaining == -1)

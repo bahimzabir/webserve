@@ -47,6 +47,7 @@
 #define BAD_GATEWAY 502
 #define ENTITY_LARGE 413
 #define _CONFLICT 409
+#define GATEWAY_TIMEOUT 504
 
 struct t_cgi_data
 {
@@ -86,6 +87,7 @@ class http_response
     std::fstream file;
     config_match conf;
     struct pollfd *client;
+    long long *timeout;
     int type;
 
 
@@ -125,8 +127,8 @@ class http_response
 
     long long remaining_bytes();
     public:
-        http_response(http_request *req,struct pollfd *fd,std::string &host,std::string &port);
-        void generate_response(pollfd *fd,http_request *req);
+        http_response(http_request *req,struct pollfd *fd,std::string &host,std::string &port,long long *out_time);
+        void generate_response(pollfd *fd,http_request *req,long long *out_time);
 };
 
 std::string int_to_string(int a);

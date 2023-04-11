@@ -21,13 +21,12 @@ class http_request
     void http_header_handler();
     void headers_handler();
     void push_header(std::string &line);
-
-
+    long long *timeout;
     public:
         http_request();
         http_request &operator=(const http_request &obj);
         http_request(const http_request &obj);
-        void parse_remaining(char *buffer,int len, int n_new_line);
+        void parse_remaining(char *buffer,int len, int n_new_line,long long *out_time);
         const std::string &get_method();
         const std::string &get_version();
         const std::string &get_path();
