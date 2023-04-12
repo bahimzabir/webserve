@@ -48,7 +48,6 @@ void http_request::push_header(std::string &line)
 
 void http_request::http_header_handler()
 {
-    std::cout << "http_header" << std::endl;
     if (!remaining_nl)
         return;
     std::string line;
@@ -66,7 +65,6 @@ void http_request::http_header_handler()
     std::getline(str_stream,field,' ');
     trim_field(field);
     http_header[2] = field;
-    std::cout <<http_header[0] + " " << http_header[1] + " " << http_header[2] + " "<< std::endl;
     if ((int)http_header[0][0] == 22)
         throw 666;
     state = REQUEST_HEADERS;
@@ -75,12 +73,10 @@ void http_request::http_header_handler()
 
 void http_request::headers_handler()
 {
-    std::cout << "headers" << std::endl;
     std::string line;
     while (remaining_nl)
     {
         std::getline(remaining,line,'\n');
-        std::cout << "*" << line << "*" << remaining_nl <<  std::endl;
         remaining_nl--;
         if (line == "\r")
         {
@@ -89,7 +85,6 @@ void http_request::headers_handler()
         }
         push_header(line);
     }
-    //handle body;
 }
 
 int http_request::get_state()

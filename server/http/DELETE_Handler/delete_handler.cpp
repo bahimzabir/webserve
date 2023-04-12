@@ -1,7 +1,5 @@
 #include "../http_response.hpp"
 
-
-
 void http_response::DELETE_check_state()
 {
     client->events = POLLOUT;

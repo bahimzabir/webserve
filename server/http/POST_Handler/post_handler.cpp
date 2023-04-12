@@ -240,13 +240,11 @@ void http_response::POST_check_state()
         if (!file.good())
             throw FORBIDDEN;
         body.append(buffer,ret);
-        std::cout << body << std::endl;
         client->revents = 0;
         if (state == CHUNKED)
             POST_upload_chunked_handler();
         return;
     }
-    //CGI
     throw FORBIDDEN;
 }
 

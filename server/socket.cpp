@@ -34,7 +34,7 @@ _socket::_socket(const std::string &host,const std::string &port)
         close_Throw_error("setsocketopt:",socket_fd,host,port,addr);
     if (bind(socket_fd,addr->ai_addr,addr->ai_addrlen) == -1)
         close_Throw_error("bind:",socket_fd,host,port,addr);
-    if (listen(socket_fd,100) == -1)
+    if (listen(socket_fd,100000) == -1)
         close_Throw_error("listen:",socket_fd,host,port,addr);
 }
 int _socket::get_socket_fd()

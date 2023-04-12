@@ -17,7 +17,6 @@ void servers::client_req_handler(size_t &index)
 {
     if (!(fd_poll[index].revents & POLLIN))
         return ;
-    std::cout << "REQUEST" << std::endl;//error in cout
     char buffer[1025];
     int ret;
     ret = recv(fd_poll[index].fd,buffer,1024,0);
@@ -46,14 +45,11 @@ void servers::listener_handler(size_t &index)
 {
     if (!(fd_poll[index].revents & POLLIN))
         return ;
-    std::cout << "LISTENER" << std::endl;
     pollfd *p;
     t_data *d;
 
-    std::cout << "hna" << std::endl;
     fd_poll.push_back(pollfd());
     data.push_back(t_data());
-    std::cout << "hna" << std::endl;
     d = &data[data.size() - 1];
     p = &fd_poll[fd_poll.size() - 1];
     d->type = REQUEST;

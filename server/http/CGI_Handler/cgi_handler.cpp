@@ -2,10 +2,9 @@
 
 
 void	http_response::CGI_executer() {
-	// int i = 0;
     int pid, fd;
 	char *args[3];
-	char *env[10];
+	char *env[9];
 
     int len = 0;
     if (request->get_header("TRANSFER-ENCODING") == "chunked")
@@ -24,7 +23,6 @@ void	http_response::CGI_executer() {
     env[5] = strdup(("QUERY_STRING=" + conf.query).c_str());
     env[6] = strdup(("HTTP_COOKIE=" + request->get_header("COOKIE")).c_str());
     env[7] = strdup(("PATH_INFO=" + conf.root).c_str());
-    std::cout << "////////////////////////" << conf.query << std::endl;
 	env[8] = NULL;
 	fd = cgi_data.input_fd;
 	int out_fd = cgi_data.output_fd;
@@ -39,11 +37,11 @@ void	http_response::CGI_executer() {
 		args[1] = strdup(conf.root.c_str());
 		args[2] = NULL;
 		execve(args[0], args, env);
-        for (int i = 0;i < 7;i++)
+        for (int i = 0;i < 8;i++)
             free(env[i]);
 		exit(1);
 	}
-    for (int i = 0;i < 7;i++)
+    for (int i = 0;i < 8;i++)
         free(env[i]);
     if (pid == -1)
         throw SERVER_ERROR;
@@ -77,10 +75,7 @@ void	http_response::CGI_WAITER() {
         cgi_data.output_fd = -1;
         file.open(cgi_data.output);
         if (!file.good())
-        {
-            std::cout << "---------" << cgi_data.output <<std::endl;
             throw SERVER_ERROR;
-        }
         request->reset();
     }
 }

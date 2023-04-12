@@ -163,7 +163,6 @@ void http_response::generate_response(pollfd *fd,http_request *req,size_t *out_t
     }
     catch(int x)
     {
-        std::cout << "ERROR   " << x << std::endl;
         if (x == CREATED && is_cgi)
         {
             type = CGI;
@@ -181,7 +180,6 @@ void http_response::generate_response(pollfd *fd,http_request *req,size_t *out_t
 void http_response::SEND_handler()
 {
     int ret;
-    std::cout << client->fd << std::endl;
     if (res_header != "")
     {
         ret = send(client->fd,res_header.c_str(),res_header.size(),0);
@@ -206,7 +204,6 @@ void http_response::SEND_handler()
 
 void http_response::ERROR_handler(int x)
 {
-    std::cout << "Error asat ::  " << x << std::endl;
     res_header.clear();
     body.clear();
     if (x != 301)
@@ -236,7 +233,6 @@ void http_response::ERROR_handler(int x)
     body += errors.get_error(x);
     content_remaining = body.size();
     headers["Content-Length"] = int_to_string(body.size());
-    std::cout << "excesss        = " << body  << std::endl;
     headers["Content-Type"] = content_type["html"];
     if (x == 301 && headers["LOCATION"] == "")
         headers["LOCATION"] = conf.return_value;
@@ -244,7 +240,6 @@ void http_response::ERROR_handler(int x)
     for (std::map<std::string,std::string>::iterator it = headers.begin(); it != headers.end(); it++)
         res_header +=  (*it).first + ":" + (*it).second + "\n";
     res_header += '\n';
-    std::cout << body.size() << " " << res_header.size() << std::endl;
     type = SEND;
 }
 
@@ -263,7 +258,6 @@ int http_response::check_cgi(std::string &file)
 
 http_response::~http_response()
 {
-    std::cout << "DESTRUCTOR called" << std::endl;
     if (is_cgi)
     {
         if (cgi_data.input != "")

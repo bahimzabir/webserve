@@ -60,7 +60,6 @@ int servers::deploy()
         num_of_revents = poll(&(fd_poll[0]),fd_poll.size(),3000);//wait for events
         for (size_t i = 0;i < fd_poll.size();i++)
         {
-            std::cout << data.size() << "-------------" << fd_poll.size() << std::endl;
             try
             {
                 if (fd_poll[i].revents & POLLBOTH)

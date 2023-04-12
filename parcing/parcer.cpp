@@ -1,18 +1,4 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   parcer.cpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: azabir <azabir@student.42.fr>              +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/03/01 16:25:41 by azabir            #+#    #+#             */
-/*   Updated: 2023/03/01 16:25:42 by azabir           ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "parcer.hpp"
-
-
 
 bool config::operator==(const config& conf) {
 	bool hasSharedPort = false;
@@ -32,7 +18,7 @@ bool config::operator==(const config& conf) {
 }
 
 bool	is_special(char c) {
-	if (c == '{' || c == ';' || c == '}' || c == ' ' || c == '\n')
+	if (c == '{' || c == ';' || c == '}' || c == ' ' || c == '\n' || c == '\t')
 		return true;
 	return false;
 }
@@ -79,7 +65,6 @@ void	add_default_params(config& conf, config& deflt) {
 	conf.ports = conf.ports.empty() ? deflt.ports : conf.ports;
 	conf.host = conf.host.empty() ? deflt.host : conf.host;
 	conf.server_names = conf.server_names.empty() ? deflt.server_names : conf.server_names;
-	//conf.client_max_body_size = conf.client_max_body_size.empty() ? deflt.client_max_body_size : conf.client_max_body_size;
 	conf.err_pages_struct = conf.err_pages_struct.empty() ? deflt.err_pages_struct : conf.err_pages_struct;
 	if (conf.routes.empty()) 
 		conf.routes = deflt.routes;
@@ -119,7 +104,7 @@ std::vector<std::string>	readFile(std::string file_path) {
 		}
 		if (tmp != "")
 			cmd.push_back(tmp);
-		if (file_content[i] != ' ' && is_special(file_content[i])) {
+		if (file_content[i] != ' ' && file_content[i] != '\t' && is_special(file_content[i])) {
 			tmp = file_content[i];
 			cmd.push_back(tmp);
 		}
@@ -327,13 +312,3 @@ std::vector<config> getServersInfos(std::string configFilePath) {
 	}
 	return servers;
 }
-
-// int main(int arc, char** av) {
-// 	std::vector<config>	servers;
-// 	try {
-// 		servers = getServersInfos(av[1]);
-// 		std::cout << "Number of servers: " << servers.size() <<"\n";
-// 	} catch (std::exception& obj) {
-// 		std::cout << obj.what();
-// 	}
-// }

@@ -4,10 +4,7 @@ size_t getSize(std::string filename)
 {
     struct stat results;
     if (stat(filename.c_str(),&results) == 0)
-    {
-        std::cout << "size :           ::::::::::" << results.st_size << std::endl;
         return results.st_size;
-    }
     return 0;
 }
 
@@ -15,7 +12,6 @@ void http_response::GET_check_state()
 {
     client->events = POLLOUT;
     struct stat s;
-    std::cout << conf.root << std::endl;
     if (stat(conf.root.c_str(),&s) == 0)
     {
         if (S_ISDIR(s.st_mode))
@@ -66,7 +62,6 @@ void http_response::GET_check_state()
 void http_response::GET_open_input()
 {
     file.open(conf.root);
-    std::cout << conf.root << std::endl;
     if (!file)
         throw FORBIDDEN;
     res_header += "HTTP/1.1 200 OK\n";
@@ -93,10 +88,7 @@ void http_response::GET_body()
     }
     SEND_handler();
     if (!file.good() && !file.eof() && body == "" && res_header == "")
-    {
-        std::cout << "error hna" << std::endl;
         throw 666;
-    }
 }
 
 
@@ -121,12 +113,12 @@ void http_response::GET_list_directory()
     for (std::map<std::string,std::string>::iterator it = headers.begin(); it != headers.end(); it++)
         res_header +=  (*it).first + ":" + (*it).second + "\n";
     res_header += "\n";
+	closedir(directory);
     type = SEND;
 }
 
 void http_response::GET_handler()
 {
-    std::cout << "GET_H" << std::endl;
     if (state == FILE)
         GET_open_input();
     else if (state == LIST_DIRECTORY)

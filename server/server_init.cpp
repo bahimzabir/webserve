@@ -45,8 +45,8 @@ void	init_default_params(config& conf) {
 			route &rt = *it;
 			if (rt.methods.empty())
 				rt.methods.push_back(DEF_ALLOW_METHODS);
-			if(rt.index.empty())
-				rt.index.push_back(DEF_INDEX);
+			// if(rt.index.empty())
+			// 	rt.index.push_back(DEF_INDEX);
 			rt.root = rt.root.empty() ? std::getenv("PWD") : rt.root;
 			if (rt.route_name != "/")
 				pathTrim(rt.route_name);
