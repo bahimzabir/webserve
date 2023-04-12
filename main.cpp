@@ -19,4 +19,5 @@ int main(int arc, char **arv)
     }
     servers webserve;
     webserve.deploy();
+	return 0;
 }

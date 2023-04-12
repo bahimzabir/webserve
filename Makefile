@@ -15,7 +15,7 @@ SRCS		=	./parcing/parcer.cpp							\
 				./server/http/http_request.cpp					\
 				./server/http/http_response.cpp					\
 				./server/fd_handler.cpp							\
-				./main.cpp								\
+				./main.cpp										\
 				./server/server_init.cpp						\
 				./server/servers.cpp							\
 				./server/socket.cpp
