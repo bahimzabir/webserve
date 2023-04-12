@@ -1,24 +1,8 @@
-# SRC= ./server/http/*/*.cpp ./server/http/*.cpp ./server/*.cpp ./parcing/*.cpp
-# SRC2= ./server/http/config_matcher.cpp ./parcing/parcer.cpp ./server/main.cpp ./server/server_init.cpp
-# CPPFLAGS = -std=c++98 -fsanitize=address -g
-# NAME = webserve
-
-
-# match:$(SRC2)
-# 	g++ $(SRC2) $(CPPFLAGS) -o match
-# webserve:$(SRC)
-# 	g++ $(SRC) $(CPPFLAGS) -o $(NAME)
-# clean:
-# 	rm -rf $(NAME)
-
-
 NAME		=	webserve
 
-NAME2		=	match
+FLAGS		=	-Wall -Werror -Wextra
 
-FLAGS		=	#-Wall -Werror -Wextra
-
-CPPFLAGS	=	-std=c++98 #-fsanitize=address -g3
+CPPFLAGS	=	-std=c++98
 
 SRCS		=	./parcing/parcer.cpp							\
 				./server/http/CGI_Handler/cgi_handler.cpp		\
@@ -36,11 +20,6 @@ SRCS		=	./parcing/parcer.cpp							\
 				./server/servers.cpp							\
 				./server/socket.cpp
 
-SRCS2		=	./server/http/config_matcher.cpp	\
-				./parcing/parcer.cpp				\
-				./main.cpp					\
-				./server/server_init.cpp
-
 OBJS		=	${SRCS:.cpp=.o}
 
 all			:	${NAME}
@@ -48,13 +27,10 @@ all			:	${NAME}
 ${NAME}		:	${SRCS}
 				c++ ${FLAGS} ${CPPFLAGS} ${SRCS} -o ${NAME}
 
-match		:	${SRCS2}
-				c++ ${FLAGS} ${CPPFLAGS} ${SRCS2} -o ${NAME2}
-
 clean		:
 				rm -rf ${OBJS}
 
 fclean		:	clean
-				rm -rf ${NAME} ${NAME2}
+				rm -rf ${NAME}
 
 re			:	fclean	all

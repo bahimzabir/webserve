@@ -2,17 +2,17 @@
 
 void trim_field(std::string &field)
 {
-    int beg = 0;
-    int end = 0;
+    size_t beg = 0;
+    size_t end = 0;
     
-    for (int i = 0;i < field.size();i++)
+    for (size_t i = 0;i < field.size();i++)
     {
         if (isspace(field[i]))
             beg++;
         else
             break;
     }
-    for (int i = field.size();i > beg; i--)
+    for (size_t i = field.size();i > beg; i--)
     {
         if (isspace(field[i - 1]))
             end++;
@@ -36,7 +36,7 @@ void http_request::push_header(std::string &line)
 
 
     std::getline(str_stream,field,':');
-    for (int i = 0; i < field.size();i++)
+    for (size_t i = 0; i < field.size();i++)
         field[i] = toupper(field[i]);
     pair.first = field;
     
@@ -100,7 +100,7 @@ int http_request::get_state()
 std::string http_request::get_header(const std::string &header)
 {
     std::string empty;
-    for (int i = 0;i < headers.size();i++)
+    for (size_t i = 0;i < headers.size();i++)
     {
         if (headers[i].first == header)
             return (headers[i].second);
@@ -110,7 +110,7 @@ std::string http_request::get_header(const std::string &header)
 std::string http_request::get_headers()
 {
     std::string head;
-    for (int i = 0;i < headers.size();i++)
+    for (size_t i = 0;i < headers.size();i++)
         head += headers[i].first + ": " + headers[i].second + "\n";
     return head;
 }

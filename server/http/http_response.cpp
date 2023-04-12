@@ -250,7 +250,7 @@ void http_response::ERROR_handler(int x)
 
 int http_response::check_cgi(std::string &file)
 {
-    for (int c = 0; c < conf.cgi_pass.size();c++)
+    for (size_t c = 0; c < conf.cgi_pass.size();c++)
     {  
         if (extention(file) == conf.cgi_pass[c].cgi_pass)
         {
@@ -316,8 +316,8 @@ std::string get_query(std::string &path)
 void decode(std::string &str)
 {
     std::string decoded;
-    int charac;
-    for (int i = 0;i < str.size();i++)
+    size_t charac;
+    for (size_t i = 0;i < str.size();i++)
     {
         if (str[i] == '%' && i + 2 < str.size())
         {

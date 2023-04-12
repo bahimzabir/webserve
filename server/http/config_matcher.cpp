@@ -53,8 +53,8 @@ route& rout_matching(std::vector<route> routes, std::string rt_name, std::string
 
 	if (rt_name == "")
 		rt_name = "//";
-	int rt_len;
-	int	vc_len = routes.size();
+	size_t rt_len;
+	size_t vc_len = routes.size();
 	std::vector<std::string> name_vpath;
 	std::vector<std::string> match_vpath;
 	std::vector<std::string> root_vpath;
@@ -62,29 +62,19 @@ route& rout_matching(std::vector<route> routes, std::string rt_name, std::string
 
 	name_vpath = pathToVec(rt_name);
 	rt_len = name_vpath.size();
-	for (int i = 0; i < vc_len; i++) {
+	for (size_t i = 0; i < vc_len; i++) {
 		match_vpath = pathToVec(routes[i].route_name);
 		if (match_vpath.size() <= rt_len)
 		{
 			tmp = "";
-			// std::cerr << "rout_needed= ";
-			// for(int i = 0; i < rt_len; i++)
-			// 	std::cerr << "/" + name_vpath[i];
-			// std::cerr << " ";
-			// std::cerr << "to_much= ";
-			// for(int i = 0; i < match_vpath.size(); i++)
-			// 	std::cerr << "/" + match_vpath[i];
-			// std::cerr << "\n";
 			if(std::equal(match_vpath.begin(), match_vpath.end(), name_vpath.begin())) {
 				rt = &routes[i];
 				root_vpath = pathToVec(routes[i].root);
-				for(int i = 0; i < root_vpath.size(); i++)
+				for(size_t i = 0; i < root_vpath.size(); i++)
 					tmp = tmp + "/" + root_vpath[i];
-				for(int i = match_vpath.size(); i < rt_len; i++)
+				for(size_t i = match_vpath.size(); i < rt_len; i++)
 					tmp = tmp + "/" + name_vpath[i];
 				rout2 = tmp;
-				// std::cerr << "\nnew_root = " << rout2 << "\n\n";
-
 			}
 		}
 	}

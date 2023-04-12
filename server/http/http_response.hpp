@@ -34,7 +34,6 @@
 #define SEND 3
 
 
-
 #define NOT_IMPLEMENTED 501
 #define NOT_ALLOWED 405
 #define END 666
@@ -80,10 +79,6 @@ class http_response
     bool is_cgi;
 	t_cgi_data	cgi_data;
 
-
-    void add_headers();
-    void check_state();
-
     void GET_handler();
     void GET_open_input();
     void GET_body();
@@ -116,6 +111,7 @@ class http_response
         ~http_response();
         void generate_response(pollfd *fd,http_request *req,size_t *out_time);
 };
+
 std::string int_to_string(int a);
 std::string extention(std::string &file);
 int count_nl (char *str,int len);

@@ -7,9 +7,9 @@ servers::servers()
     d.type = LISTENER;
     int index = 0;
 
-    for (int i = 0;i < config_info.size() - 1;i++)
+    for (size_t i = 0;i < config_info.size() - 1;i++)
     {
-        for (int port_index = 0; port_index < config_info[i].ports.size();port_index++)
+        for (size_t port_index = 0; port_index < config_info[i].ports.size();port_index++)
         {
             try
             {   
@@ -42,7 +42,7 @@ servers::servers()
         exit(1);
     }
 }
-void servers::delete_client(int index)
+void servers::delete_client(size_t index)
 {
     close(fd_poll[index].fd);
     fd_poll.erase(fd_poll.begin() + index);
@@ -52,13 +52,13 @@ void servers::delete_client(int index)
 
 int servers::deploy()
 {
-    void (servers::*handlers[4])(int &) = {&servers::listener_handler,&servers::client_req_handler,&servers::client_res_handler};
+    void (servers::*handlers[4])(size_t &) = {&servers::listener_handler,&servers::client_req_handler,&servers::client_res_handler};
     int num_of_revents;
     signal(SIGPIPE, SIG_IGN);
     while (1)
     {
         num_of_revents = poll(&(fd_poll[0]),fd_poll.size(),3000);//wait for events
-        for (int i = 0;i < fd_poll.size();i++)
+        for (size_t i = 0;i < fd_poll.size();i++)
         {
             std::cout << data.size() << "-------------" << fd_poll.size() << std::endl;
             try

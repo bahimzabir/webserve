@@ -30,13 +30,11 @@ class servers
 
     public:
         servers();
-        void client_req_handler(int &index);
-        void client_res_handler(int &index);
-        void listener_handler(int &index);
-        void file_handler(int index);
-        void delete_client(int index);
+        void client_req_handler(size_t &index);
+        void client_res_handler(size_t &index);
+        void listener_handler(size_t &index);
+        void delete_client(size_t index);
         int deploy();
-        void timeout_handler(int index);
 };
 
 void server_init(std::string confPath);

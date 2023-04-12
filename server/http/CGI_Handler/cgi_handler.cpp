@@ -2,7 +2,7 @@
 
 
 void	http_response::CGI_executer() {
-	int i = 0;
+	// int i = 0;
     int pid, fd;
 	char *args[3];
 	char *env[10];

@@ -4,7 +4,6 @@
 
 struct config_match
 {
-    // TO DO: autoindex & mbs to int 
     std::vector<std::string>	methods;
     std::string                 root;
     std::vector<std::string>	index;

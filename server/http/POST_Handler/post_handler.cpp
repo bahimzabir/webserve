@@ -3,12 +3,13 @@
 
 int new_line(std::string &body)
 {
-    int i = 0;
-    if (i < body.size() && body[i] == '\r')
+    size_t i = 0;
+    size_t size = body.size();
+    if (i < size && body[i] == '\r')
         i++;
-    if (i < body.size() && body[i] == '\n')
+    if (i < size && body[i] == '\n')
         i++;
-    while(i < body.size())
+    while(i < size)
     {
         if (body[i] == '\n')
             return 1;
@@ -28,8 +29,10 @@ void remove_white_spaces(std::string &body)
 
 std::string extention(std::string &file)
 {
-    int pos = file.find_last_of('.');
+    size_t pos = file.find_last_of('.');
     if (pos == std::string::npos)
+        return "";
+    if (pos + 1 >= file.size())
         return "";
     return file.substr(pos + 1);
 }
@@ -82,7 +85,7 @@ void http_response::POST_upload_chunked_handler(void)
                     throw BAD_REQUEST;
                 body.erase(0,substring.size());
                 remove_white_spaces(body);
-                amount = (body.size() > content_remaining) ? content_remaining : body.size();
+                amount = ((long long)body.size() > content_remaining) ? content_remaining : body.size();
                 substring = body.substr(0,amount);
                 content_remaining -= amount;
                 body.erase(0,amount);
@@ -93,7 +96,7 @@ void http_response::POST_upload_chunked_handler(void)
         }
         else if (content_remaining)
         {
-            amount = (body.size() > content_remaining) ? content_remaining : body.size();
+            amount = ((long long)body.size() > content_remaining) ? content_remaining : body.size();
             substring = body.substr(0,amount);
             content_remaining -= amount;
             body.erase(0,amount);
@@ -121,7 +124,7 @@ void http_response::POST_upload_normal_handler(void)
         content_remaining = body.size();
     body.append(buffer,ret);
     size = body.size();
-    if (body.size() > content_remaining)
+    if ((long long)body.size() > content_remaining)
         size = content_remaining;
     file.write(body.c_str(),size);
     body.erase(0,size);
@@ -141,7 +144,7 @@ void http_response::POST_check_cgi()
     {
         if (S_ISDIR(s.st_mode))
         {
-            for (int i = 0;i < conf.index.size();i++)
+            for (size_t i = 0;i < conf.index.size();i++)
             {
                 if (check_cgi(conf.index[i]))
                 {

@@ -18,12 +18,12 @@ bool config::operator==(const config& conf) {
 	bool hasSharedPort = false;
 	bool hasSharedName = false;
 
-	for(int i = 0; i < conf.server_names.size(); i++) {
+	for(size_t i = 0; i < conf.server_names.size(); i++) {
 		if (std::find(this->server_names.begin(), this->server_names.end(), conf.server_names[i]) != this->server_names.end())
 			hasSharedName = true;
 	}
 
-	for(int i = 0; i < conf.ports.size(); i++) {
+	for(size_t i = 0; i < conf.ports.size(); i++) {
 		if (std::find(this->ports.begin(), this->ports.end(), conf.ports[i]) != this->ports.end())
 			hasSharedPort = true;
 	}
