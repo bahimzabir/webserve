@@ -2,8 +2,6 @@ NAME		=	webserv
 
 FLAGS		=	-Wall -Werror -Wextra
 
-CPPFLAGS	=	
-
 SRCS		=	./parcing/parcer.cpp							\
 				./server/http/CGI_Handler/cgi_handler.cpp		\
 				./server/http/DELETE_Handler/delete_handler.cpp	\
@@ -25,7 +23,7 @@ OBJS		=	${SRCS:.cpp=.o}
 all			:	${NAME}
 
 ${NAME}		:	${SRCS}
-				c++ ${FLAGS} ${CPPFLAGS} ${SRCS} -o ${NAME}
+				c++ ${FLAGS} ${SRCS} -o ${NAME}
 
 clean		:
 				rm -rf ${OBJS}
