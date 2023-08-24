@@ -2,7 +2,7 @@ NAME		=	webserv
 
 FLAGS		=	-Wall -Werror -Wextra
 
-CPPFLAGS	=	-std=c++98
+CPPFLAGS	=	
 
 SRCS		=	./parcing/parcer.cpp							\
 				./server/http/CGI_Handler/cgi_handler.cpp		\
